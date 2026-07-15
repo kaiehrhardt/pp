@@ -1,8 +1,11 @@
 import homepage from "../client/index.html";
 import pkg from "../../package.json";
+import { readChangelog } from "./changelog";
 import * as domain from "./domain/room";
 import { RoomStore } from "./domain/store";
 import { createWebSocketHandlers, type SocketData } from "./ws/handler";
+
+const CHANGELOG_PATH = `${import.meta.dir}/../../CHANGELOG.md`;
 
 const store = new RoomStore();
 store.startCleanup();
@@ -20,6 +23,12 @@ const server = Bun.serve<SocketData>({
     "/api/version": {
       GET() {
         return Response.json({ version: pkg.version });
+      },
+    },
+    "/api/changelog": {
+      async GET() {
+        const versions = await readChangelog(CHANGELOG_PATH);
+        return Response.json({ versions });
       },
     },
   },

@@ -4,4 +4,5 @@ docs
 CONTEXT.md
 README.md
 *.md
+!CHANGELOG.md
 .claude

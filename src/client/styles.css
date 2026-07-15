@@ -676,4 +676,121 @@ button:disabled {
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
   box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+}
+
+.version-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  color: var(--fg);
+}
+
+.changelog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(3px);
+  animation: rise-in 0.15s ease-out;
+}
+
+.changelog-modal {
+  width: min(480px, 100%);
+  max-height: min(70vh, 600px);
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.changelog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--card-border);
+  flex-shrink: 0;
+}
+
+.changelog-header h2 {
+  font-size: 1.15rem;
+}
+
+.changelog-close {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--card-border);
+  background: var(--bg);
+  color: var(--muted);
+}
+
+.changelog-close:hover {
+  color: var(--fg);
+}
+
+.changelog-body {
+  overflow-y: auto;
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.changelog-empty {
+  color: var(--muted);
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.changelog-version {
+  margin-bottom: 1.5rem;
+}
+
+.changelog-version:last-child {
+  margin-bottom: 0;
+}
+
+.changelog-version h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+}
+
+.changelog-date {
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.changelog-category {
+  margin-bottom: 0.75rem;
+}
+
+.changelog-category h4 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  margin: 0 0 0.35rem;
+}
+
+.changelog-category ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.changelog-category li {
+  font-size: 0.9rem;
+  line-height: 1.4;
 }

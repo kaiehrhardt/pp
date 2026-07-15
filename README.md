@@ -28,8 +28,8 @@ An incognito window matters because the reconnect token lives in `localStorage` 
 ## In a container
 
 ```bash
-docker build -t planning-poker .
-docker run --rm -p 3000:3000 planning-poker
+bun run docker:build
+bun run docker:run
 ```
 
 Runs on [http://localhost:3000](http://localhost:3000) as well — in production mode, without hot reload. The port can be changed via the `PORT` environment variable (`-e PORT=8080 -p 8080:8080`).
@@ -58,3 +58,7 @@ src/
     ├── domain/      # pure domain logic: Room, Participant, deck, evaluation
     └── ws/          # WebSocket protocol & handler, wires the domain up to transport
 ```
+
+## License
+
+[MIT](./LICENSE)

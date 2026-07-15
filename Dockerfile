@@ -10,6 +10,7 @@ FROM base AS runtime
 ENV NODE_ENV=production
 COPY --from=install /app/node_modules ./node_modules
 COPY package.json ./
+COPY CHANGELOG.md ./
 COPY src ./src
 
 EXPOSE 3000
