@@ -41,6 +41,12 @@ function send(roomId: string, participantId: string, message: ServerMessage): vo
   for (const conn of conns) conn.send(payload);
 }
 
+function closeSockets(roomId: string, participantId: string): void {
+  const conns = sockets.get(socketKey(roomId, participantId));
+  if (!conns) return;
+  for (const conn of conns) conn.close();
+}
+
 function broadcastRoomState(room: Room): void {
   const evaluation = domain.computeEvaluation(room);
   for (const participant of room.participants.values()) {
@@ -115,6 +121,18 @@ export function createWebSocketHandlers(store: RoomStore) {
         case "reaction": {
           if (!room.participants.has(message.to)) return;
           broadcastReaction(room, participant.id, message.to, message.emoji);
+          return;
+        }
+        case "kick": {
+          if (room.hostId !== participant.id) return;
+          if (message.participantId === participant.id) return;
+          if (!room.participants.has(message.participantId)) return;
+
+          send(room.id, message.participantId, { type: "kicked" });
+          domain.removeParticipant(room, message.participantId);
+          maybeAutoReveal(room);
+          broadcastRoomState(room);
+          setTimeout(() => closeSockets(room.id, message.participantId), 100);
           return;
         }
       }

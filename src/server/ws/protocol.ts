@@ -4,7 +4,8 @@ export type ClientMessage =
   | { type: "vote"; card: Card }
   | { type: "toggleSpectator" }
   | { type: "newRound" }
-  | { type: "reaction"; to: string; emoji: string };
+  | { type: "reaction"; to: string; emoji: string }
+  | { type: "kick"; participantId: string };
 
 export interface ParticipantDTO {
   id: string;
@@ -28,6 +29,7 @@ export type ServerMessage =
   | { type: "joined"; roomId: string; participantId: string; token: string }
   | { type: "roomState"; room: RoomStateDTO }
   | { type: "reaction"; from: string; to: string; emoji: string }
+  | { type: "kicked" }
   | { type: "error"; message: string };
 
 export function toRoomStateDTO(room: Room, evaluation: Evaluation | null, viewerId: string): RoomStateDTO {

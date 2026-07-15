@@ -36,6 +36,12 @@ Runs on [http://localhost:3000](http://localhost:3000) as well — in production
 
 A GitHub Actions workflow (`.github/workflows/docker-build.yml`) builds the image on every push/PR to `main`. On pushes to `main` it also publishes to GitHub Container Registry as `ghcr.io/<owner>/<repo>:latest` and `:<commit-sha>` (pull requests only build, to avoid publishing untested images). No extra secrets needed — it authenticates with the workflow's built-in `GITHUB_TOKEN`. The resulting package is private by default; change its visibility under the repo's "Packages" tab if you want it public.
 
+## Releases
+
+Versioning is handled by [semantic-release](https://semantic-release.gitbook.io/) (`.releaserc.cjs`), driven by [Conventional Commits](https://www.conventionalcommits.org/) on `main`: `fix:` → patch, `feat:` → minor, `BREAKING CHANGE:` → major. On every push to `main`, `.github/workflows/release.yml` determines the next version, updates `package.json` and `CHANGELOG.md`, tags the commit, and creates a GitHub release. Requires a `SEMANTIC_RELEASE_TOKEN` repo secret (a PAT with `repo` scope) so the release commit can trigger the follow-up workflow below — the default `GITHUB_TOKEN` can't do that.
+
+Once a release commit lands, `.github/workflows/release-docker.yml` builds the container image and pushes it to GHCR tagged with that version (`ghcr.io/<owner>/<repo>:<version>`), on top of the `:latest`/`:<sha>` tags `docker-build.yml` already pushes on every push to `main`.
+
 ## Tests & typecheck
 
 ```bash

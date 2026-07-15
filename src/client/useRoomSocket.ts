@@ -25,7 +25,9 @@ export function useRoomSocket(roomId: string, join: JoinInfo | null) {
   const [roomState, setRoomState] = useState<RoomStateDTO | null>(null);
   const [participantId, setParticipantId] = useState<string | null>(null);
   const [reactions, setReactions] = useState<ReactionEvent[]>([]);
+  const [kicked, setKicked] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
+  const kickedRef = useRef(false);
 
   useEffect(() => {
     const hasToken = Boolean(localStorage.getItem(tokenKey(roomId)));
@@ -67,12 +69,17 @@ export function useRoomSocket(roomId: string, join: JoinInfo | null) {
           setTimeout(() => {
             setReactions((current) => current.filter((r) => r.id !== id));
           }, 1500);
+        } else if (message.type === "kicked") {
+          kickedRef.current = true;
+          localStorage.removeItem(tokenKey(roomId));
+          setKicked(true);
         }
       };
 
       socket.onclose = () => {
         if (cancelled) return;
         setStatus("closed");
+        if (kickedRef.current) return;
         reconnectTimer = setTimeout(connect, 1500);
       };
     }
@@ -97,9 +104,11 @@ export function useRoomSocket(roomId: string, join: JoinInfo | null) {
     roomState,
     participantId,
     reactions,
+    kicked,
     vote: useCallback((card: Card) => send({ type: "vote", card }), [send]),
     toggleSpectator: useCallback(() => send({ type: "toggleSpectator" }), [send]),
     newRound: useCallback(() => send({ type: "newRound" }), [send]),
     react: useCallback((to: string, emoji: string) => send({ type: "reaction", to, emoji }), [send]),
+    kick: useCallback((participantId: string) => send({ type: "kick", participantId }), [send]),
   };
 }

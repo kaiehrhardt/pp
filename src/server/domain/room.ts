@@ -78,6 +78,13 @@ export function disconnectParticipant(room: Room, participantId: string): void {
   if (!anyoneConnected) room.emptySince = Date.now();
 }
 
+export function removeParticipant(room: Room, participantId: string): void {
+  room.participants.delete(participantId);
+
+  const anyoneConnected = [...room.participants.values()].some((p) => p.connected);
+  if (!anyoneConnected) room.emptySince = Date.now();
+}
+
 export function toggleSpectator(participant: Participant): void {
   participant.isSpectator = !participant.isSpectator;
 }

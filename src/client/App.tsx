@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Landing } from "./components/Landing";
 import { Room } from "./components/Room";
 import { ThemeToggle } from "./components/ThemeToggle";
+import { VersionBadge } from "./components/VersionBadge";
 
 export function App() {
   const [path, setPath] = useState(() => window.location.pathname);
@@ -24,6 +25,7 @@ export function App() {
   return (
     <>
       <ThemeToggle />
+      <VersionBadge />
       {roomMatch?.[1] ? <Room roomId={roomMatch[1]} /> : <Landing navigate={navigate} />}
     </>
   );

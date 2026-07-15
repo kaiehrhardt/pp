@@ -20,7 +20,7 @@ interface RoomProps {
 export function Room({ roomId }: RoomProps) {
   const [joinInfo, setJoinInfo] = useState<JoinInfo | null>(null);
   const [needsJoin] = useState(() => !localStorage.getItem(tokenKey(roomId)));
-  const { status, roomState, participantId, reactions, vote, toggleSpectator, newRound, react } =
+  const { status, roomState, participantId, reactions, kicked, vote, toggleSpectator, newRound, react, kick } =
     useRoomSocket(roomId, joinInfo);
 
   const roomLink = useMemo(() => `${location.origin}/room/${roomId}`, [roomId]);
@@ -28,6 +28,15 @@ export function Room({ roomId }: RoomProps) {
 
   if (needsJoin && !joinInfo) {
     return <JoinForm onSubmit={setJoinInfo} />;
+  }
+
+  if (kicked) {
+    return (
+      <main className="room-connecting">
+        <span className="brand-logo">👢</span>
+        <p>Der Host hat dich aus dem Room geworfen.</p>
+      </main>
+    );
   }
 
   if (!roomState || !participantId) {
@@ -96,7 +105,9 @@ export function Room({ roomId }: RoomProps) {
                 isHost={roomState.hostId === participant.id}
                 isSelf={participant.id === participantId}
                 revealed={revealed}
+                canKick={isHost && participant.id !== participantId}
                 onReact={(emoji) => react(participant.id, emoji)}
+                onKick={() => kick(participant.id)}
               />
             </div>
           );

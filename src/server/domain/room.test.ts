@@ -8,6 +8,7 @@ import {
   disconnectParticipant,
   isRoomExpired,
   reconnectParticipant,
+  removeParticipant,
   reveal,
   startNewRound,
   toggleSpectator,
@@ -123,6 +124,39 @@ describe("toggleSpectator", () => {
 
     toggleSpectator(alice);
     expect(alice.isSpectator).toBe(false);
+  });
+});
+
+describe("removeParticipant", () => {
+  test("removes the participant from the room entirely", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+    const bob = addParticipant(room, "Bob", false);
+
+    removeParticipant(room, bob.id);
+
+    expect(room.participants.has(bob.id)).toBe(false);
+    expect(room.participants.has(alice.id)).toBe(true);
+  });
+
+  test("marks the room empty if the removed participant was the only one connected", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+
+    removeParticipant(room, alice.id);
+
+    expect(room.emptySince).not.toBeNull();
+  });
+
+  test("can tip a pending round into auto-reveal once the remaining voters are all in", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+    const bob = addParticipant(room, "Bob", false);
+    castVote(alice, 5);
+
+    removeParticipant(room, bob.id);
+
+    expect(allVotesIn(room)).toBe(true);
   });
 });
 

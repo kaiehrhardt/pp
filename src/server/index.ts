@@ -1,4 +1,5 @@
 import homepage from "../client/index.html";
+import pkg from "../../package.json";
 import * as domain from "./domain/room";
 import { RoomStore } from "./domain/store";
 import { createWebSocketHandlers, type SocketData } from "./ws/handler";
@@ -14,6 +15,11 @@ const server = Bun.serve<SocketData>({
       POST() {
         const room = store.create();
         return Response.json({ roomId: room.id });
+      },
+    },
+    "/api/version": {
+      GET() {
+        return Response.json({ version: pkg.version });
       },
     },
   },

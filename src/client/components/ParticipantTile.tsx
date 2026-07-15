@@ -14,10 +14,20 @@ interface ParticipantTileProps {
   isHost: boolean;
   isSelf: boolean;
   revealed: boolean;
+  canKick: boolean;
   onReact: (emoji: string) => void;
+  onKick: () => void;
 }
 
-export function ParticipantTile({ participant, isHost, isSelf, revealed, onReact }: ParticipantTileProps) {
+export function ParticipantTile({
+  participant,
+  isHost,
+  isSelf,
+  revealed,
+  canKick,
+  onReact,
+  onKick,
+}: ParticipantTileProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
   let voteBadge: string | null = null;
@@ -32,12 +42,18 @@ export function ParticipantTile({ participant, isHost, isSelf, revealed, onReact
     }
   }
 
+  function handleKick() {
+    if (confirm(`${participant.name} wirklich aus dem Room werfen?`)) onKick();
+  }
+
   return (
-    <>
+    <div
+      className={`participant-tile${isSelf ? " participant-tile-self" : ""}${!participant.connected ? " participant-tile-disconnected" : ""}`}
+      style={{ "--seat-color": participant.color } as CSSProperties}
+    >
       <button
         type="button"
-        className={`participant-tile${isSelf ? " participant-tile-self" : ""}${!participant.connected ? " participant-tile-disconnected" : ""}`}
-        style={{ "--seat-color": participant.color } as CSSProperties}
+        className="participant-tile-main"
         onClick={() => !isSelf && setPickerOpen((open) => !open)}
         disabled={isSelf}
         title={isSelf ? undefined : `Smiley auf ${participant.name} werfen`}
@@ -59,6 +75,17 @@ export function ParticipantTile({ participant, isHost, isSelf, revealed, onReact
         )}
       </button>
 
+      {canKick && (
+        <button
+          type="button"
+          className="kick-badge"
+          title={`${participant.name} kicken`}
+          onClick={handleKick}
+        >
+          ✕
+        </button>
+      )}
+
       {pickerOpen && (
         <EmojiPicker
           onSelect={(emoji) => {
@@ -68,6 +95,6 @@ export function ParticipantTile({ participant, isHost, isSelf, revealed, onReact
           onClose={() => setPickerOpen(false)}
         />
       )}
-    </>
+    </div>
   );
 }
