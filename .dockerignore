@@ -1,0 +1,7 @@
+node_modules
+.git
+docs
+CONTEXT.md
+README.md
+*.md
+.claude
