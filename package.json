@@ -3,7 +3,7 @@
   "module": "src/server/index.ts",
   "type": "module",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "scripts": {
     "dev": "bun --hot src/server/index.ts",
     "start": "bun src/server/index.ts",
