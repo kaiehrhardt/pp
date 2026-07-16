@@ -21,7 +21,7 @@ const server = Bun.serve<SocketData>({
       },
     },
     "/api/rooms/:id": {
-      GET(req) {
+      GET(req: Bun.BunRequest<"/api/rooms/:id">) {
         const room = store.get(req.params.id);
         if (!room) return new Response("Room not found", { status: 404 });
         return Response.json({ full: domain.isRoomFull(room) });
