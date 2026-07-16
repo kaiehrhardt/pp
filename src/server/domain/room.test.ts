@@ -8,6 +8,8 @@ import {
   createRoom,
   disconnectParticipant,
   isRoomExpired,
+  isRoomFull,
+  MAX_PARTICIPANTS,
   reconnectParticipant,
   removeParticipant,
   reveal,
@@ -33,6 +35,21 @@ describe("addParticipant", () => {
     const second = addParticipant(room, "Bob", false);
     expect(room.hostId).toBe(first.id);
     expect(second.isSpectator).toBe(false);
+  });
+});
+
+describe("isRoomFull", () => {
+  test("is false below the participant cap and true once it is reached", () => {
+    const room = createRoom();
+    for (let i = 0; i < MAX_PARTICIPANTS - 1; i++) {
+      addParticipant(room, `Participant ${i}`, false);
+    }
+    expect(isRoomFull(room)).toBe(false);
+
+    addParticipant(room, "One more", false);
+
+    expect(isRoomFull(room)).toBe(true);
+    expect(room.participants.size).toBe(MAX_PARTICIPANTS);
   });
 });
 
