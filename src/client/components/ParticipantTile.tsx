@@ -15,6 +15,7 @@ interface ParticipantTileProps {
   isSelf: boolean;
   revealed: boolean;
   canKick: boolean;
+  flipDelay: number;
   onReact: (emoji: string) => void;
   onKick: () => void;
 }
@@ -25,22 +26,14 @@ export function ParticipantTile({
   isSelf,
   revealed,
   canKick,
+  flipDelay,
   onReact,
   onKick,
 }: ParticipantTileProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
-  let voteBadge: string | null = null;
-  let voteBadgeState: "empty" | "pending" | "value" = "empty";
-  if (!participant.isSpectator) {
-    if (revealed) {
-      voteBadge = participant.vote !== null ? cardLabel(participant.vote) : "–";
-      voteBadgeState = "value";
-    } else if (participant.hasVoted) {
-      voteBadge = "✓";
-      voteBadgeState = "pending";
-    }
-  }
+  const showVoteBadge = !participant.isSpectator && (revealed || participant.hasVoted);
+  const voteValue = participant.vote !== null ? cardLabel(participant.vote) : "–";
 
   function handleKick() {
     if (confirm(`${participant.name} wirklich aus dem Room werfen?`)) onKick();
@@ -70,8 +63,16 @@ export function ParticipantTile({
         </span>
         <span className="participant-name">{participant.name}</span>
         {participant.isSpectator && <span className="participant-badge">Zuschauer</span>}
-        {voteBadge !== null && (
-          <span className={`participant-vote participant-vote-${voteBadgeState}`}>{voteBadge}</span>
+        {showVoteBadge && (
+          <span
+            className={`participant-vote${revealed ? " participant-vote-revealed" : ""}`}
+            style={{ "--flip-delay": `${flipDelay}ms` } as CSSProperties}
+          >
+            <span className="participant-vote-inner">
+              <span className="participant-vote-face participant-vote-front">🃏</span>
+              <span className="participant-vote-face participant-vote-back">{voteValue}</span>
+            </span>
+          </span>
         )}
       </button>
 

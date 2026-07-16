@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import { DECK, isNumericCard } from "./deck";
-import type { Card, Evaluation, NumericCard, Participant, Room } from "./types";
+import type { Card, ChatMessage, Evaluation, NumericCard, Participant, Room } from "./types";
 
 const AVATAR_COLORS = [
   "#e11d48",
@@ -22,6 +22,7 @@ export function createRoom(): Room {
     hostId: null,
     phase: "voting",
     participants: new Map(),
+    chatMessages: [],
     createdAt: Date.now(),
     emptySince: null,
   };
@@ -137,6 +138,19 @@ export function computeEvaluation(room: Room): Evaluation | null {
   }
 
   return { average, recommendedCard };
+}
+
+export function addChatMessage(room: Room, participant: Participant, text: string): ChatMessage {
+  const message: ChatMessage = {
+    id: nanoid(10),
+    participantId: participant.id,
+    participantName: participant.name,
+    participantColor: participant.color,
+    text,
+    sentAt: Date.now(),
+  };
+  room.chatMessages.push(message);
+  return message;
 }
 
 export function isRoomExpired(room: Room, now: number = Date.now()): boolean {

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import type { JoinInfo } from "../useRoomSocket";
 import { tokenKey, useRoomSocket } from "../useRoomSocket";
 import { CardHand } from "./CardHand";
+import { ChatPanel } from "./ChatPanel";
 import { JoinForm } from "./JoinForm";
 import { ParticipantTile } from "./ParticipantTile";
 import type { SeatPosition } from "./ThrownEmoji";
@@ -20,8 +21,20 @@ interface RoomProps {
 export function Room({ roomId }: RoomProps) {
   const [joinInfo, setJoinInfo] = useState<JoinInfo | null>(null);
   const [needsJoin] = useState(() => !localStorage.getItem(tokenKey(roomId)));
-  const { status, roomState, participantId, reactions, kicked, vote, toggleSpectator, newRound, react, kick } =
-    useRoomSocket(roomId, joinInfo);
+  const {
+    status,
+    roomState,
+    participantId,
+    reactions,
+    chatMessages,
+    kicked,
+    vote,
+    toggleSpectator,
+    newRound,
+    react,
+    kick,
+    sendChat,
+  } = useRoomSocket(roomId, joinInfo);
 
   const roomLink = useMemo(() => `${location.origin}/room/${roomId}`, [roomId]);
   const [copied, setCopied] = useState(false);
@@ -77,48 +90,53 @@ export function Room({ roomId }: RoomProps) {
         </button>
       </header>
 
-      <div className="table">
-        <div className="table-surface">
-          {revealed && roomState.evaluation && (
-            <div className="evaluation">
-              <div className="evaluation-average">Ø {roomState.evaluation.average.toFixed(1)}</div>
-              <div className="evaluation-recommendation">🎯 Empfehlung: {roomState.evaluation.recommendedCard}</div>
-            </div>
-          )}
-          {isHost && revealed && (
-            <button type="button" className="new-round-button" onClick={newRound}>
-              Neue Runde
-            </button>
-          )}
+      <div className="table-area">
+        <div className="table">
+          <div className="table-surface">
+            {revealed && roomState.evaluation && (
+              <div className="evaluation">
+                <div className="evaluation-average">Ø {roomState.evaluation.average.toFixed(1)}</div>
+                <div className="evaluation-recommendation">
+                  🎯 Empfehlung: {roomState.evaluation.recommendedCard}
+                </div>
+              </div>
+            )}
+            {isHost && revealed && (
+              <button type="button" className="new-round-button" onClick={newRound}>
+                Neue Runde
+              </button>
+            )}
+          </div>
+
+          {roomState.participants.map((participant, index) => {
+            const pos = seatPositions.get(participant.id)!;
+            return (
+              <div
+                key={participant.id}
+                className="seat-position"
+                style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
+              >
+                <ParticipantTile
+                  participant={participant}
+                  isHost={roomState.hostId === participant.id}
+                  isSelf={participant.id === participantId}
+                  revealed={revealed}
+                  canKick={isHost && participant.id !== participantId}
+                  flipDelay={index * 70}
+                  onReact={(emoji) => react(participant.id, emoji)}
+                  onKick={() => kick(participant.id)}
+                />
+              </div>
+            );
+          })}
+
+          {reactions.map((r) => {
+            const from = seatPositions.get(r.from);
+            const to = seatPositions.get(r.to);
+            if (!from || !to) return null;
+            return <ThrownEmoji key={r.id} emoji={r.emoji} from={from} to={to} />;
+          })}
         </div>
-
-        {roomState.participants.map((participant) => {
-          const pos = seatPositions.get(participant.id)!;
-          return (
-            <div
-              key={participant.id}
-              className="seat-position"
-              style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
-            >
-              <ParticipantTile
-                participant={participant}
-                isHost={roomState.hostId === participant.id}
-                isSelf={participant.id === participantId}
-                revealed={revealed}
-                canKick={isHost && participant.id !== participantId}
-                onReact={(emoji) => react(participant.id, emoji)}
-                onKick={() => kick(participant.id)}
-              />
-            </div>
-          );
-        })}
-
-        {reactions.map((r) => {
-          const from = seatPositions.get(r.from);
-          const to = seatPositions.get(r.to);
-          if (!from || !to) return null;
-          return <ThrownEmoji key={r.id} emoji={r.emoji} from={from} to={to} />;
-        })}
       </div>
 
       <footer className="room-footer">
@@ -132,6 +150,8 @@ export function Room({ roomId }: RoomProps) {
           onSelect={vote}
         />
       </footer>
+
+      <ChatPanel messages={chatMessages} selfId={participantId} onSend={sendChat} />
     </main>
   );
 }

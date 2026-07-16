@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
+  addChatMessage,
   addParticipant,
   allVotesIn,
   castVote,
@@ -223,6 +224,33 @@ describe("computeEvaluation", () => {
 
     expect(computeEvaluation(room)?.average).toBe(4);
     expect(computeEvaluation(room)?.recommendedCard).toBe(5);
+  });
+});
+
+describe("addChatMessage", () => {
+  test("appends the message to the room and snapshots the sender's name/color", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+
+    const message = addChatMessage(room, alice, "hey team");
+
+    expect(room.chatMessages).toEqual([message]);
+    expect(message).toMatchObject({
+      participantId: alice.id,
+      participantName: "Alice",
+      participantColor: alice.color,
+      text: "hey team",
+    });
+  });
+
+  test("keeps prior messages attributed correctly even after the sender is removed", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+    addChatMessage(room, alice, "hey team");
+
+    removeParticipant(room, alice.id);
+
+    expect(room.chatMessages[0]).toMatchObject({ participantName: "Alice", text: "hey team" });
   });
 });
 

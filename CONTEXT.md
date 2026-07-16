@@ -28,3 +28,6 @@ _Avoid_: Consensus (concept was dropped in favor of the recommendation)
 **Spectator**:
 A participant who isn't estimating and therefore doesn't factor into the auto-reveal condition ("everyone has voted"). Chosen via a checkbox at join time, or toggled on/off at any point during the session. Can still throw reactions.
 _Avoid_: Observer, Watcher
+
+**Chat**:
+Room-wide text messages between participants, ephemeral like the room itself (no persistence beyond its lifetime). A message snapshots the sender's name and color at send time, so history stays correctly attributed even after that participant leaves or gets kicked.

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Card } from "../server/domain/types";
+import type { Card, ChatMessage } from "../server/domain/types";
 import type { ClientMessage, RoomStateDTO, ServerMessage } from "../server/ws/protocol";
 
 export interface JoinInfo {
@@ -25,6 +25,7 @@ export function useRoomSocket(roomId: string, join: JoinInfo | null) {
   const [roomState, setRoomState] = useState<RoomStateDTO | null>(null);
   const [participantId, setParticipantId] = useState<string | null>(null);
   const [reactions, setReactions] = useState<ReactionEvent[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [kicked, setKicked] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
   const kickedRef = useRef(false);
@@ -73,6 +74,10 @@ export function useRoomSocket(roomId: string, join: JoinInfo | null) {
           kickedRef.current = true;
           localStorage.removeItem(tokenKey(roomId));
           setKicked(true);
+        } else if (message.type === "chatHistory") {
+          setChatMessages(message.messages);
+        } else if (message.type === "chatMessage") {
+          setChatMessages((current) => [...current, message.message]);
         }
       };
 
@@ -104,11 +109,13 @@ export function useRoomSocket(roomId: string, join: JoinInfo | null) {
     roomState,
     participantId,
     reactions,
+    chatMessages,
     kicked,
     vote: useCallback((card: Card) => send({ type: "vote", card }), [send]),
     toggleSpectator: useCallback(() => send({ type: "toggleSpectator" }), [send]),
     newRound: useCallback(() => send({ type: "newRound" }), [send]),
     react: useCallback((to: string, emoji: string) => send({ type: "reaction", to, emoji }), [send]),
     kick: useCallback((participantId: string) => send({ type: "kick", participantId }), [send]),
+    sendChat: useCallback((text: string) => send({ type: "chat", text }), [send]),
   };
 }

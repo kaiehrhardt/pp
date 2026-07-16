@@ -2,8 +2,10 @@ import type { ServerWebSocket } from "bun";
 import { isValidCard } from "../domain/deck";
 import * as domain from "../domain/room";
 import type { RoomStore } from "../domain/store";
-import type { Room } from "../domain/types";
+import type { ChatMessage, Room } from "../domain/types";
 import { toRoomStateDTO, type ClientMessage, type ServerMessage } from "./protocol";
+
+const MAX_CHAT_MESSAGE_LENGTH = 500;
 
 export interface SocketData {
   roomId: string;
@@ -61,6 +63,12 @@ function broadcastReaction(room: Room, from: string, to: string, emoji: string):
   }
 }
 
+function broadcastChatMessage(room: Room, message: ChatMessage): void {
+  for (const participant of room.participants.values()) {
+    send(room.id, participant.id, { type: "chatMessage", message });
+  }
+}
+
 function maybeAutoReveal(room: Room): void {
   if (room.phase === "voting" && domain.allVotesIn(room)) {
     domain.reveal(room);
@@ -81,6 +89,7 @@ export function createWebSocketHandlers(store: RoomStore) {
         participantId: participant.id,
         token: participant.token,
       });
+      send(room.id, participant.id, { type: "chatHistory", messages: room.chatMessages });
       broadcastRoomState(room);
     },
 
@@ -133,6 +142,13 @@ export function createWebSocketHandlers(store: RoomStore) {
           maybeAutoReveal(room);
           broadcastRoomState(room);
           setTimeout(() => closeSockets(room.id, message.participantId), 100);
+          return;
+        }
+        case "chat": {
+          const text = message.text.trim();
+          if (!text || text.length > MAX_CHAT_MESSAGE_LENGTH) return;
+          const chatMessage = domain.addChatMessage(room, participant, text);
+          broadcastChatMessage(room, chatMessage);
           return;
         }
       }

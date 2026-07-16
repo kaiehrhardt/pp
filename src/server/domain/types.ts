@@ -13,11 +13,21 @@ export interface Participant {
 
 export type RoomPhase = "voting" | "revealed";
 
+export interface ChatMessage {
+  id: string;
+  participantId: string;
+  participantName: string;
+  participantColor: string;
+  text: string;
+  sentAt: number;
+}
+
 export interface Room {
   id: string;
   hostId: string | null;
   phase: RoomPhase;
   participants: Map<string, Participant>;
+  chatMessages: ChatMessage[];
   createdAt: number;
   emptySince: number | null;
 }

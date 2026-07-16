@@ -1,11 +1,12 @@
-import type { Card, Evaluation, Room } from "../domain/types";
+import type { Card, ChatMessage, Evaluation, Room } from "../domain/types";
 
 export type ClientMessage =
   | { type: "vote"; card: Card }
   | { type: "toggleSpectator" }
   | { type: "newRound" }
   | { type: "reaction"; to: string; emoji: string }
-  | { type: "kick"; participantId: string };
+  | { type: "kick"; participantId: string }
+  | { type: "chat"; text: string };
 
 export interface ParticipantDTO {
   id: string;
@@ -30,6 +31,8 @@ export type ServerMessage =
   | { type: "roomState"; room: RoomStateDTO }
   | { type: "reaction"; from: string; to: string; emoji: string }
   | { type: "kicked" }
+  | { type: "chatHistory"; messages: ChatMessage[] }
+  | { type: "chatMessage"; message: ChatMessage }
   | { type: "error"; message: string };
 
 export function toRoomStateDTO(room: Room, evaluation: Evaluation | null, viewerId: string): RoomStateDTO {
