@@ -1,12 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocale } from "../i18n/useLocale";
 import type { JoinInfo } from "../useRoomSocket";
 import { tokenKey, useRoomSocket } from "../useRoomSocket";
 import { CardHand } from "./CardHand";
 import { ChatPanel } from "./ChatPanel";
+import { Confetti } from "./Confetti";
+import { GuessInput } from "./GuessInput";
 import { JoinForm } from "./JoinForm";
 import { ParticipantTile } from "./ParticipantTile";
+import { RpsDuelOverlay } from "./RpsDuelOverlay";
 import type { SeatPosition } from "./ThrownEmoji";
 import { ThrownEmoji } from "./ThrownEmoji";
 
@@ -39,10 +42,28 @@ export function Room({ roomId }: RoomProps) {
     react,
     kick,
     sendChat,
+    guessAverage,
+    duelInvite,
+    duelPending,
+    activeDuel,
+    duelResult,
+    challengeToRps,
+    respondToRps,
+    submitRpsMove,
+    cancelRpsChallenge,
   } = useRoomSocket(roomId, joinInfo);
 
   const roomLink = useMemo(() => `${location.origin}/room/${roomId}`, [roomId]);
   const [copied, setCopied] = useState(false);
+
+  const prevPhaseRef = useRef(roomState?.phase);
+  const [confettiActive, setConfettiActive] = useState(false);
+  useEffect(() => {
+    if (roomState && prevPhaseRef.current === "voting" && roomState.phase === "revealed" && roomState.unanimousVote) {
+      setConfettiActive(true);
+    }
+    prevPhaseRef.current = roomState?.phase;
+  }, [roomState?.phase, roomState?.unanimousVote]);
 
   if (needsJoin && !joinInfo) {
     return <JoinForm onSubmit={setJoinInfo} />;
@@ -94,6 +115,7 @@ export function Room({ roomId }: RoomProps) {
 
   return (
     <main className="room">
+      {confettiActive && <Confetti onDone={() => setConfettiActive(false)} />}
       <header className="room-header">
         <div className="brand">
           <span className="brand-logo">🃏</span>
@@ -120,6 +142,9 @@ export function Room({ roomId }: RoomProps) {
                 {t("room.newRoundButton")}
               </button>
             )}
+            {!revealed && self && !self.isSpectator && (
+              <GuessInput value={self.guess} onSubmit={guessAverage} />
+            )}
           </div>
 
           {roomState.participants.map((participant, index) => {
@@ -136,9 +161,12 @@ export function Room({ roomId }: RoomProps) {
                   isSelf={participant.id === participantId}
                   revealed={revealed}
                   canKick={isHost && participant.id !== participantId}
+                  isGuessWinner={roomState.guessWinnerIds.includes(participant.id)}
+                  canChallenge={participant.id !== participantId && participant.connected && roomState.phase === "voting"}
                   flipDelay={index * 70}
                   onReact={(emoji) => react(participant.id, emoji)}
                   onKick={() => kick(participant.id)}
+                  onChallenge={() => challengeToRps(participant.id)}
                 />
               </div>
             );
@@ -166,6 +194,17 @@ export function Room({ roomId }: RoomProps) {
       </footer>
 
       <ChatPanel messages={chatMessages} selfId={participantId} onSend={sendChat} />
+
+      <RpsDuelOverlay
+        duelInvite={duelInvite}
+        duelPending={duelPending}
+        activeDuel={activeDuel}
+        duelResult={duelResult}
+        nameFor={(id) => roomState.participants.find((p) => p.id === id)?.name ?? "?"}
+        onRespond={respondToRps}
+        onMove={submitRpsMove}
+        onCancel={cancelRpsChallenge}
+      />
     </main>
   );
 }

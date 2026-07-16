@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Card, ChatMessage } from "../server/domain/types";
+import type { Card, ChatMessage, RpsMove } from "../server/domain/types";
 import type { ClientMessage, RoomStateDTO, ServerMessage } from "../server/ws/protocol";
 
 export interface JoinInfo {
@@ -12,6 +12,37 @@ export interface ReactionEvent {
   from: string;
   to: string;
   emoji: string;
+}
+
+export interface DuelInvite {
+  duelId: string;
+  from: string;
+}
+
+export interface DuelPending {
+  duelId: string;
+  to: string;
+}
+
+export interface ActiveDuel {
+  duelId: string;
+  opponentId: string;
+  round: number;
+  yourScore: number;
+  opponentScore: number;
+  bestOf: number;
+}
+
+export interface DuelResult {
+  duelId: string;
+  opponentId: string;
+  yourMove: RpsMove;
+  opponentMove: RpsMove;
+  outcome: "win" | "lose" | "draw";
+  yourScore: number;
+  opponentScore: number;
+  bestOf: number;
+  matchOver: boolean;
 }
 
 type Status = "connecting" | "open" | "closed";
@@ -28,6 +59,10 @@ export function useRoomSocket(roomId: string, join: JoinInfo | null) {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [kicked, setKicked] = useState(false);
   const [roomFull, setRoomFull] = useState(false);
+  const [duelInvite, setDuelInvite] = useState<DuelInvite | null>(null);
+  const [duelPending, setDuelPending] = useState<DuelPending | null>(null);
+  const [activeDuel, setActiveDuel] = useState<ActiveDuel | null>(null);
+  const [duelResult, setDuelResult] = useState<DuelResult | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
   const kickedRef = useRef(false);
 
@@ -88,6 +123,56 @@ export function useRoomSocket(roomId: string, join: JoinInfo | null) {
           setChatMessages(message.messages);
         } else if (message.type === "chatMessage") {
           setChatMessages((current) => [...current, message.message]);
+        } else if (message.type === "duelChallenge") {
+          setDuelInvite({ duelId: message.duelId, from: message.from });
+        } else if (message.type === "duelPending") {
+          setDuelPending({ duelId: message.duelId, to: message.to });
+        } else if (message.type === "duelDeclined" || message.type === "duelCancelled") {
+          setDuelPending((current) => (current?.duelId === message.duelId ? null : current));
+          setDuelInvite((current) => (current?.duelId === message.duelId ? null : current));
+          setActiveDuel((current) => (current?.duelId === message.duelId ? null : current));
+        } else if (message.type === "duelStarted") {
+          setDuelInvite(null);
+          setDuelPending(null);
+          setActiveDuel({
+            duelId: message.duelId,
+            opponentId: message.opponentId,
+            round: 0,
+            yourScore: 0,
+            opponentScore: 0,
+            bestOf: message.bestOf,
+          });
+        } else if (message.type === "duelResult") {
+          const result: DuelResult = {
+            duelId: message.duelId,
+            opponentId: message.opponentId,
+            yourMove: message.yourMove,
+            opponentMove: message.opponentMove,
+            outcome: message.outcome,
+            yourScore: message.yourScore,
+            opponentScore: message.opponentScore,
+            bestOf: message.bestOf,
+            matchOver: message.matchOver,
+          };
+          setDuelResult(result);
+          if (message.matchOver) {
+            setActiveDuel(null);
+            setTimeout(() => {
+              setDuelResult((current) => (current === result ? null : current));
+            }, 4000);
+          } else {
+            setActiveDuel({
+              duelId: message.duelId,
+              opponentId: message.opponentId,
+              round: message.round,
+              yourScore: message.yourScore,
+              opponentScore: message.opponentScore,
+              bestOf: message.bestOf,
+            });
+            setTimeout(() => {
+              setDuelResult((current) => (current === result ? null : current));
+            }, 1800);
+          }
         }
       };
 
@@ -122,11 +207,32 @@ export function useRoomSocket(roomId: string, join: JoinInfo | null) {
     chatMessages,
     kicked,
     roomFull,
+    duelInvite,
+    duelPending,
+    activeDuel,
+    duelResult,
     vote: useCallback((card: Card) => send({ type: "vote", card }), [send]),
     toggleSpectator: useCallback(() => send({ type: "toggleSpectator" }), [send]),
     newRound: useCallback(() => send({ type: "newRound" }), [send]),
     react: useCallback((to: string, emoji: string) => send({ type: "reaction", to, emoji }), [send]),
     kick: useCallback((participantId: string) => send({ type: "kick", participantId }), [send]),
     sendChat: useCallback((text: string) => send({ type: "chat", text }), [send]),
+    guessAverage: useCallback((value: number) => send({ type: "guessAverage", value }), [send]),
+    challengeToRps: useCallback((opponentId: string) => send({ type: "duelChallenge", opponentId }), [send]),
+    respondToRps: useCallback(
+      (duelId: string, accept: boolean) => {
+        if (!accept) setDuelInvite((current) => (current?.duelId === duelId ? null : current));
+        send({ type: "duelRespond", duelId, accept });
+      },
+      [send],
+    ),
+    submitRpsMove: useCallback((duelId: string, move: RpsMove) => send({ type: "duelMove", duelId, move }), [send]),
+    cancelRpsChallenge: useCallback(
+      (duelId: string) => {
+        setDuelPending((current) => (current?.duelId === duelId ? null : current));
+        send({ type: "duelCancel", duelId });
+      },
+      [send],
+    ),
   };
 }

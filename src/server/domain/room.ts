@@ -2,6 +2,8 @@ import { nanoid } from "nanoid";
 import { DECK, isNumericCard } from "./deck";
 import type { Card, ChatMessage, Evaluation, NumericCard, Participant, Room } from "./types";
 
+const EPSILON = 1e-9;
+
 const AVATAR_COLORS = [
   "#e11d48",
   "#f43f5e",
@@ -32,6 +34,7 @@ export function createRoom(): Room {
     phase: "voting",
     participants: new Map(),
     chatMessages: [],
+    duels: new Map(),
     createdAt: Date.now(),
     emptySince: null,
   };
@@ -49,6 +52,7 @@ export function addParticipant(room: Room, name: string, isSpectator: boolean): 
     color: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)]!,
     isSpectator,
     vote: null,
+    guess: null,
     connected: true,
   };
   room.participants.set(participant.id, participant);
@@ -107,6 +111,10 @@ export function castVote(participant: Participant, card: Card): void {
   participant.vote = card;
 }
 
+export function castGuess(participant: Participant, value: number): void {
+  participant.guess = value;
+}
+
 export function votingParticipants(room: Room): Participant[] {
   return [...room.participants.values()].filter((p) => p.connected && !p.isSpectator);
 }
@@ -114,6 +122,13 @@ export function votingParticipants(room: Room): Participant[] {
 export function allVotesIn(room: Room): boolean {
   const voters = votingParticipants(room);
   return voters.length > 0 && voters.every((p) => p.vote !== null);
+}
+
+export function isUnanimousVote(room: Room): boolean {
+  const voters = votingParticipants(room);
+  if (voters.length < 2) return false;
+  const [first, ...rest] = voters;
+  return first!.vote !== null && rest.every((p) => p.vote === first!.vote);
 }
 
 export function reveal(room: Room): void {
@@ -124,6 +139,7 @@ export function startNewRound(room: Room): void {
   room.phase = "voting";
   for (const participant of room.participants.values()) {
     participant.vote = null;
+    participant.guess = null;
   }
 }
 
@@ -151,6 +167,19 @@ export function computeEvaluation(room: Room): Evaluation | null {
   }
 
   return { average, recommendedCard };
+}
+
+export function computeGuessWinners(room: Room, evaluation: Evaluation | null): string[] {
+  if (!evaluation) return [];
+  const guessers = votingParticipants(room).filter((p) => p.guess !== null);
+  if (guessers.length === 0) return [];
+
+  let best = Infinity;
+  for (const p of guessers) {
+    const diff = Math.abs(p.guess! - evaluation.average);
+    if (diff < best) best = diff;
+  }
+  return guessers.filter((p) => Math.abs(p.guess! - evaluation.average) - best <= EPSILON).map((p) => p.id);
 }
 
 export function addChatMessage(room: Room, participant: Participant, text: string): ChatMessage {

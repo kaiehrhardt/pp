@@ -1,8 +1,9 @@
 import type { ServerWebSocket } from "bun";
 import { isValidCard } from "../domain/deck";
+import * as duelDomain from "../domain/duel";
 import * as domain from "../domain/room";
 import type { RoomStore } from "../domain/store";
-import type { ChatMessage, Room } from "../domain/types";
+import type { ChatMessage, Duel, Room, RpsMove } from "../domain/types";
 import { toRoomStateDTO, type ClientMessage, type ServerMessage } from "./protocol";
 
 const MAX_CHAT_MESSAGE_LENGTH = 500;
@@ -75,6 +76,41 @@ function maybeAutoReveal(room: Room): void {
   }
 }
 
+function sendDuelResult(
+  room: Room,
+  duel: Duel,
+  moves: Map<string, RpsMove>,
+  winnerId: string | null,
+  matchOver: boolean,
+): void {
+  for (const [selfId, otherId] of [
+    [duel.challengerId, duel.opponentId],
+    [duel.opponentId, duel.challengerId],
+  ] as const) {
+    const outcome = winnerId === null ? "draw" : winnerId === selfId ? "win" : "lose";
+    send(room.id, selfId, {
+      type: "duelResult",
+      duelId: duel.id,
+      opponentId: otherId,
+      round: duel.roundsPlayed,
+      yourMove: moves.get(selfId)!,
+      opponentMove: moves.get(otherId)!,
+      outcome,
+      yourScore: duel.wins.get(selfId) ?? 0,
+      opponentScore: duel.wins.get(otherId) ?? 0,
+      bestOf: duelDomain.RPS_BEST_OF,
+      matchOver,
+    });
+  }
+}
+
+function cancelDuelsAndNotify(room: Room, participantId: string): void {
+  for (const duel of duelDomain.cancelDuelsFor(room, participantId)) {
+    const other = duel.challengerId === participantId ? duel.opponentId : duel.challengerId;
+    send(room.id, other, { type: "duelCancelled", duelId: duel.id });
+  }
+}
+
 export function createWebSocketHandlers(store: RoomStore) {
   return {
     open(ws: ServerWebSocket<SocketData>) {
@@ -138,10 +174,73 @@ export function createWebSocketHandlers(store: RoomStore) {
           if (!room.participants.has(message.participantId)) return;
 
           send(room.id, message.participantId, { type: "kicked" });
+          cancelDuelsAndNotify(room, message.participantId);
           domain.removeParticipant(room, message.participantId);
           maybeAutoReveal(room);
           broadcastRoomState(room);
           setTimeout(() => closeSockets(room.id, message.participantId), 100);
+          return;
+        }
+        case "guessAverage": {
+          if (participant.isSpectator || room.phase !== "voting") return;
+          if (!Number.isFinite(message.value)) return;
+          domain.castGuess(participant, message.value);
+          broadcastRoomState(room);
+          return;
+        }
+        case "duelChallenge": {
+          if (room.phase !== "voting") return;
+          const opponent = room.participants.get(message.opponentId);
+          if (!opponent || opponent.id === participant.id || !opponent.connected) return;
+          const duel = duelDomain.createDuel(room, participant.id, opponent.id);
+          if (!duel) return;
+          send(room.id, opponent.id, { type: "duelChallenge", duelId: duel.id, from: participant.id });
+          send(room.id, participant.id, { type: "duelPending", duelId: duel.id, to: opponent.id });
+          return;
+        }
+        case "duelRespond": {
+          const duel = room.duels.get(message.duelId);
+          if (!duel || duel.opponentId !== participant.id || duel.status !== "pending") return;
+          if (!message.accept) {
+            duelDomain.removeDuel(room, duel.id);
+            send(room.id, duel.challengerId, { type: "duelDeclined", duelId: duel.id });
+            return;
+          }
+          duelDomain.acceptDuel(duel);
+          send(room.id, duel.challengerId, {
+            type: "duelStarted",
+            duelId: duel.id,
+            opponentId: duel.opponentId,
+            bestOf: duelDomain.RPS_BEST_OF,
+          });
+          send(room.id, duel.opponentId, {
+            type: "duelStarted",
+            duelId: duel.id,
+            opponentId: duel.challengerId,
+            bestOf: duelDomain.RPS_BEST_OF,
+          });
+          return;
+        }
+        case "duelMove": {
+          const duel = room.duels.get(message.duelId);
+          if (!duel || duel.status !== "active") return;
+          if (duel.challengerId !== participant.id && duel.opponentId !== participant.id) return;
+          if (!duelDomain.isValidRpsMove(message.move)) return;
+          duelDomain.submitMove(duel, participant.id, message.move);
+          if (!duelDomain.bothMovesIn(duel)) return;
+          const moves = new Map(duel.moves);
+          const { winnerId } = duelDomain.resolveRound(duel);
+          duelDomain.recordRoundResult(duel, winnerId);
+          const matchOver = duelDomain.isMatchOver(duel);
+          sendDuelResult(room, duel, moves, winnerId, matchOver);
+          if (matchOver) duelDomain.removeDuel(room, duel.id);
+          return;
+        }
+        case "duelCancel": {
+          const duel = room.duels.get(message.duelId);
+          if (!duel || duel.challengerId !== participant.id || duel.status !== "pending") return;
+          duelDomain.removeDuel(room, duel.id);
+          send(room.id, duel.opponentId, { type: "duelCancelled", duelId: duel.id });
           return;
         }
         case "chat": {
@@ -158,6 +257,7 @@ export function createWebSocketHandlers(store: RoomStore) {
       unregisterSocket(ws);
       const room = store.get(ws.data.roomId);
       if (!room) return;
+      cancelDuelsAndNotify(room, ws.data.participantId);
       domain.disconnectParticipant(room, ws.data.participantId);
       broadcastRoomState(room);
     },

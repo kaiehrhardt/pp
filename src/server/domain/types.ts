@@ -8,6 +8,7 @@ export interface Participant {
   color: string;
   isSpectator: boolean;
   vote: Card | null;
+  guess: number | null;
   connected: boolean;
 }
 
@@ -22,12 +23,27 @@ export interface ChatMessage {
   sentAt: number;
 }
 
+export type RpsMove = "rock" | "paper" | "scissors";
+export type DuelStatus = "pending" | "active";
+
+export interface Duel {
+  id: string;
+  challengerId: string;
+  opponentId: string;
+  status: DuelStatus;
+  moves: Map<string, RpsMove>;
+  wins: Map<string, number>;
+  roundsPlayed: number;
+  createdAt: number;
+}
+
 export interface Room {
   id: string;
   hostId: string | null;
   phase: RoomPhase;
   participants: Map<string, Participant>;
   chatMessages: ChatMessage[];
+  duels: Map<string, Duel>;
   createdAt: number;
   emptySince: number | null;
 }

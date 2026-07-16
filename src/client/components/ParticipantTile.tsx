@@ -16,9 +16,12 @@ interface ParticipantTileProps {
   isSelf: boolean;
   revealed: boolean;
   canKick: boolean;
+  isGuessWinner: boolean;
+  canChallenge: boolean;
   flipDelay: number;
   onReact: (emoji: string) => void;
   onKick: () => void;
+  onChallenge: () => void;
 }
 
 export function ParticipantTile({
@@ -27,9 +30,12 @@ export function ParticipantTile({
   isSelf,
   revealed,
   canKick,
+  isGuessWinner,
+  canChallenge,
   flipDelay,
   onReact,
   onKick,
+  onChallenge,
 }: ParticipantTileProps) {
   const { t } = useTranslation();
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -67,6 +73,11 @@ export function ParticipantTile({
         {participant.isSpectator && (
           <span className="participant-badge">{t("participantTile.spectatorBadge")}</span>
         )}
+        {revealed && isGuessWinner && (
+          <span className="participant-badge participant-badge-guess">
+            {t("participantTile.guessWinnerBadge")}
+          </span>
+        )}
         {showVoteBadge && (
           <span
             className={`participant-vote${revealed ? " participant-vote-revealed" : ""}`}
@@ -88,6 +99,17 @@ export function ParticipantTile({
           onClick={handleKick}
         >
           ✕
+        </button>
+      )}
+
+      {canChallenge && (
+        <button
+          type="button"
+          className="rps-challenge-badge"
+          title={t("participantTile.rpsChallengeTitle", { name: participant.name })}
+          onClick={onChallenge}
+        >
+          ✊
         </button>
       )}
 

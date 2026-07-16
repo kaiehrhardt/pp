@@ -42,7 +42,34 @@
     "throwEmojiTitle": "Throw emoji at {{name}}",
     "hostTitle": "Host",
     "spectatorBadge": "Spectator",
-    "kickTitle": "Kick {{name}}"
+    "kickTitle": "Kick {{name}}",
+    "guessWinnerBadge": "🔮 Closest guess",
+    "rpsChallengeTitle": "Challenge {{name}} to Rock-Paper-Scissors"
+  },
+  "guessInput": {
+    "placeholder": "Guess Ø",
+    "submitButton": "Guess",
+    "lockedIn": "🔮 Guessed: {{value}}"
+  },
+  "rpsDuel": {
+    "inviteMessage": "{{name}} challenges you to Rock-Paper-Scissors!",
+    "acceptButton": "Accept",
+    "declineButton": "Decline",
+    "waitingForResponse": "Waiting for {{name}} to respond…",
+    "cancelButton": "Cancel",
+    "pickMove": "Rock-Paper-Scissors vs. {{name}}",
+    "waitingForOpponent": "Waiting for opponent…",
+    "bestOf": "Best of {{n}}",
+    "roundOutcome": {
+      "win": "Round won!",
+      "lose": "Round lost",
+      "draw": "Draw – again!"
+    },
+    "matchOutcome": {
+      "win": "You win the match! 🎉",
+      "lose": "You lose the match 😅",
+      "draw": "Draw 🤝"
+    }
   },
   "changelogModal": {
     "title": "Changelog",

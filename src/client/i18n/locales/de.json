@@ -42,7 +42,34 @@
     "throwEmojiTitle": "Smiley auf {{name}} werfen",
     "hostTitle": "Host",
     "spectatorBadge": "Zuschauer",
-    "kickTitle": "{{name}} kicken"
+    "kickTitle": "{{name}} kicken",
+    "guessWinnerBadge": "🔮 Bester Tipp",
+    "rpsChallengeTitle": "{{name}} zu Schnick-Schnack-Schnuck herausfordern"
+  },
+  "guessInput": {
+    "placeholder": "Tipp Ø",
+    "submitButton": "Tippen",
+    "lockedIn": "🔮 Getippt: {{value}}"
+  },
+  "rpsDuel": {
+    "inviteMessage": "{{name}} fordert dich zu Schnick-Schnack-Schnuck heraus!",
+    "acceptButton": "Annehmen",
+    "declineButton": "Ablehnen",
+    "waitingForResponse": "Warte auf Antwort von {{name}}…",
+    "cancelButton": "Abbrechen",
+    "pickMove": "Schnick-Schnack-Schnuck gegen {{name}}",
+    "waitingForOpponent": "Warte auf Gegner…",
+    "bestOf": "Best of {{n}}",
+    "roundOutcome": {
+      "win": "Runde gewonnen!",
+      "lose": "Runde verloren",
+      "draw": "Unentschieden – nochmal!"
+    },
+    "matchOutcome": {
+      "win": "Du gewinnst das Match! 🎉",
+      "lose": "Du verlierst das Match 😅",
+      "draw": "Unentschieden 🤝"
+    }
   },
   "changelogModal": {
     "title": "Changelog",

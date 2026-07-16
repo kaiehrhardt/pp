@@ -31,3 +31,15 @@ _Avoid_: Observer, Watcher
 
 **Chat**:
 Room-wide text messages between participants, ephemeral like the room itself (no persistence beyond its lifetime). A message snapshots the sender's name and color at send time, so history stays correctly attributed even after that participant leaves or gets kicked.
+
+**Guess**:
+A participant's optional, secret prediction of what the round's Evaluation average will turn out to be, submitted before the reveal. Hidden from others until reveal, same as a Vote. Whoever's guess is numerically closest to the actual average is shown as the round's winner via a badge; an exact tie for closest is shared by everyone tied, rather than picked arbitrarily.
+_Note_: distinct from Evaluation — a Guess is a participant's prediction *of* the average, not the computed average/recommendation itself.
+
+**Duel**:
+A private, best-of-three Rock-Paper-Scissors side-game between two participants, started as a challenge the other side can accept or decline. Runs until one side wins two rounds (draws are replayed without counting); the running score is shown throughout. Purely for fun while waiting for votes — has no effect on votes, Reveal, or the Evaluation, and isn't limited to voting participants (Spectators can duel too).
+_Avoid_: Game (too generic — could be read as referring to the planning poker round itself)
+
+**Unanimous vote**:
+A Reveal where every voting participant's Vote came out as the exact same card. Celebrated client-side with a one-shot confetti animation the moment it happens.
+_Avoid_: Consensus (deliberately dropped from this domain already — Unanimous vote is a narrower, purely mechanical "same card" check, not a claim that the team actually agrees on the estimate)

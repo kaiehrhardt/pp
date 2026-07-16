@@ -3,13 +3,16 @@ import {
   addChatMessage,
   addParticipant,
   allVotesIn,
+  castGuess,
   castVote,
   computeEvaluation,
+  computeGuessWinners,
   createRoom,
   disconnectParticipant,
   findParticipantByToken,
   isRoomExpired,
   isRoomFull,
+  isUnanimousVote,
   MAX_PARTICIPANTS,
   reconnectParticipant,
   removeParticipant,
@@ -133,6 +136,51 @@ describe("auto-reveal", () => {
   });
 });
 
+describe("isUnanimousVote", () => {
+  test("is false with fewer than two voters", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+    castVote(alice, 5);
+
+    expect(isUnanimousVote(room)).toBe(false);
+  });
+
+  test("is true when every voter picked the exact same card", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+    const bob = addParticipant(room, "Bob", false);
+    castVote(alice, "coffee");
+    castVote(bob, "coffee");
+
+    expect(isUnanimousVote(room)).toBe(true);
+  });
+
+  test("is false when votes differ", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+    const bob = addParticipant(room, "Bob", false);
+    castVote(alice, 5);
+    castVote(bob, 8);
+
+    expect(isUnanimousVote(room)).toBe(false);
+  });
+
+  test("ignores spectators and disconnected participants", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+    const bob = addParticipant(room, "Bob", false);
+    const carol = addParticipant(room, "Carol", true);
+    const dave = addParticipant(room, "Dave", false);
+    castVote(alice, 5);
+    castVote(bob, 5);
+    castVote(carol, 8);
+    castVote(dave, 8);
+    disconnectParticipant(room, dave.id);
+
+    expect(isUnanimousVote(room)).toBe(true);
+  });
+});
+
 describe("toggleSpectator", () => {
   test("flips back and forth", () => {
     const room = createRoom();
@@ -180,12 +228,14 @@ describe("removeParticipant", () => {
 });
 
 describe("startNewRound", () => {
-  test("resets phase to voting and clears every vote", () => {
+  test("resets phase to voting and clears every vote and guess", () => {
     const room = createRoom();
     const alice = addParticipant(room, "Alice", false);
     const bob = addParticipant(room, "Bob", false);
     castVote(alice, 3);
     castVote(bob, 5);
+    castGuess(alice, 4);
+    castGuess(bob, 6);
     reveal(room);
 
     startNewRound(room);
@@ -193,6 +243,76 @@ describe("startNewRound", () => {
     expect(room.phase).toBe("voting");
     expect(alice.vote).toBeNull();
     expect(bob.vote).toBeNull();
+    expect(alice.guess).toBeNull();
+    expect(bob.guess).toBeNull();
+  });
+});
+
+describe("castGuess", () => {
+  test("sets the participant's guess", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+
+    castGuess(alice, 4.5);
+
+    expect(alice.guess).toBe(4.5);
+  });
+});
+
+describe("computeGuessWinners", () => {
+  test("returns an empty array when there is no evaluation", () => {
+    const room = createRoom();
+    addParticipant(room, "Alice", false);
+
+    expect(computeGuessWinners(room, null)).toEqual([]);
+  });
+
+  test("returns an empty array when nobody guessed", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+    castVote(alice, 5);
+
+    expect(computeGuessWinners(room, computeEvaluation(room))).toEqual([]);
+  });
+
+  test("picks the single closest guesser", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+    const bob = addParticipant(room, "Bob", false);
+    castVote(alice, 5);
+    castVote(bob, 8);
+    castGuess(alice, 8);
+    castGuess(bob, 6.5);
+
+    const evaluation = computeEvaluation(room);
+    expect(evaluation?.average).toBeCloseTo(6.5);
+    expect(computeGuessWinners(room, evaluation)).toEqual([bob.id]);
+  });
+
+  test("shares the win on an exact tie", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+    const bob = addParticipant(room, "Bob", false);
+    castVote(alice, 5);
+    castVote(bob, 8);
+    castGuess(alice, 6);
+    castGuess(bob, 7);
+
+    const evaluation = computeEvaluation(room);
+    expect(evaluation?.average).toBe(6.5);
+    expect(computeGuessWinners(room, evaluation)).toEqual([alice.id, bob.id]);
+  });
+
+  test("ignores spectators", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+    const bob = addParticipant(room, "Bob", true);
+    castVote(alice, 5);
+    castGuess(alice, 10);
+    castGuess(bob, 5);
+
+    const evaluation = computeEvaluation(room);
+    expect(computeGuessWinners(room, evaluation)).toEqual([alice.id]);
   });
 });
 
