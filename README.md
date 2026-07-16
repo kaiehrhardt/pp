@@ -34,13 +34,13 @@ bun run docker:run
 
 Runs on [http://localhost:3000](http://localhost:3000) as well — in production mode, without hot reload. The port can be changed via the `PORT` environment variable (`-e PORT=8080 -p 8080:8080`).
 
-A GitHub Actions workflow (`.github/workflows/docker-build.yml`) builds the image on every push/PR to `main`. On pushes to `main` it also publishes to GitHub Container Registry as `ghcr.io/<owner>/<repo>:latest` and `:<commit-sha>` (pull requests only build, to avoid publishing untested images). No extra secrets needed — it authenticates with the workflow's built-in `GITHUB_TOKEN`. The resulting package is private by default; change its visibility under the repo's "Packages" tab if you want it public.
+A GitHub Actions workflow (`.github/workflows/ci.yml`) runs on feature branches and pull requests (not on `main`): it first runs the typecheck and test suite, then — only if that passes — builds the image and pushes it to GitHub Container Registry, tagged `pr-<number>` for a pull request or `<commit-sha>` for a plain branch push. No extra secrets needed — it authenticates with the workflow's built-in `GITHUB_TOKEN`. The resulting package is private by default; change its visibility under the repo's "Packages" tab if you want it public.
 
 ## Releases
 
 Versioning is handled by [semantic-release](https://semantic-release.gitbook.io/) (`.releaserc.cjs`), driven by [Conventional Commits](https://www.conventionalcommits.org/) on `main`: `fix:` → patch, `feat:` → minor, `BREAKING CHANGE:` → major. On every push to `main`, `.github/workflows/release.yml` determines the next version, updates `package.json` and `CHANGELOG.md`, tags the commit, and creates a GitHub release. Requires a `SEMANTIC_RELEASE_TOKEN` repo secret (a PAT with `repo` scope) so the release commit can trigger the follow-up workflow below — the default `GITHUB_TOKEN` can't do that.
 
-Once a release commit lands, `.github/workflows/release-docker.yml` builds the container image and pushes it to GHCR tagged with that version (`ghcr.io/<owner>/<repo>:<version>`), on top of the `:latest`/`:<sha>` tags `docker-build.yml` already pushes on every push to `main`.
+Once a release commit lands, `.github/workflows/release-docker.yml` builds the container image and pushes it to GHCR tagged with that version *and* `:latest` (`ghcr.io/<owner>/<repo>:<version>` / `:latest`) — so `:latest` always tracks the most recently released version, not just the latest commit on `main`.
 
 ## Tests & typecheck
 
