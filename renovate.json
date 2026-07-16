@@ -9,7 +9,7 @@
       "groupName": "all dependencies",
       "groupSlug": "all",
       "matchPackageNames": ["*"],
-      "schedule": ["before 3am every day"],
+      "schedule": ["before 3am"],
       "minimumReleaseAge": "7 days",
       "matchUpdateTypes": ["patch", "minor"],
       "automerge": true
