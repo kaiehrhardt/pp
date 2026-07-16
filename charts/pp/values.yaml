@@ -1,0 +1,107 @@
+# -- Number of pod replicas.
+# IMPORTANT: room state (participants, votes, chat) lives in each pod's memory only —
+# there is no shared/external store. With more than one replica, participants can be
+# routed to a pod that never created (or already lost) their room, causing "Room not
+# found" errors and inconsistent state. Keep this at 1 unless the app gains a shared
+# backing store; do not enable autoscaling.replicaCount below 1 either.
+replicaCount: 1
+
+image:
+  repository: ghcr.io/kaiehrhardt/pp
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag; defaults to the chart's appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # -- Create a ServiceAccount for the pod.
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+# -- The image's Dockerfile has no USER directive, so the container runs as root by
+# default (oven/bun:1's default user). Setting runAsNonRoot here would crash-loop the
+# pod. If the image is later changed to run as a non-root user, add runAsNonRoot/
+# runAsUser to podSecurityContext to match.
+podSecurityContext: {}
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  # Example for the nginx ingress controller, which by default closes idle upstream
+  # connections after a few minutes and can drop the app's WebSocket connections:
+  #   nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+  #   nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  hosts:
+    - host: pp.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  # - secretName: pp-tls
+  #   hosts:
+  #     - pp.example.com
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# -- Liveness/readiness probes hit the lightweight version endpoint (no side effects).
+livenessProbe:
+  httpGet:
+    path: /api/version
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /api/version
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+# -- Disabled by design: see the replicaCount note above. Do not enable this without
+# also giving the app a shared room store — the HPA target metrics are wired up but
+# scaling out will break room consistency exactly like a manual replica increase.
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+
+# -- Extra environment variables for the container, e.g.:
+#   - name: NODE_ENV
+#     value: production
+extraEnv: []
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1

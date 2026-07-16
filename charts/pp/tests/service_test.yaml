@@ -1,0 +1,35 @@
+suite: service
+templates:
+  - service.yaml
+tests:
+  - it: defaults to a ClusterIP service on port 80 forwarding to the http container port
+    asserts:
+      - equal:
+          path: spec.type
+          value: ClusterIP
+      - equal:
+          path: spec.ports[0].port
+          value: 80
+      - equal:
+          path: spec.ports[0].targetPort
+          value: http
+
+  - it: honors an overridden service type and port
+    set:
+      service.type: LoadBalancer
+      service.port: 8080
+    asserts:
+      - equal:
+          path: spec.type
+          value: LoadBalancer
+      - equal:
+          path: spec.ports[0].port
+          value: 8080
+
+  - it: selects pods by the chart's selector labels
+    asserts:
+      - equal:
+          path: spec.selector
+          value:
+            app.kubernetes.io/name: pp
+            app.kubernetes.io/instance: RELEASE-NAME

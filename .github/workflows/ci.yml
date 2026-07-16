@@ -74,3 +74,67 @@ jobs:
           tags: ${{ steps.image.outputs.tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  helm-chart:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup Helm
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
+
+      - name: Install helm-unittest plugin
+        run: helm plugin install https://github.com/helm-unittest/helm-unittest --version v1.1.1
+
+      - name: Lint chart
+        run: helm lint charts/pp
+
+      - name: Unit test chart templates
+        run: helm unittest charts/pp
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      - name: Build image for cluster smoke test
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          push: false
+          load: true
+          tags: pp:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Create kind cluster
+        uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # v1.14.0
+        with:
+          cluster_name: pp-chart-ci
+
+      - name: Load image into cluster
+        run: kind load docker-image pp:ci --name pp-chart-ci
+
+      - name: Install chart
+        run: |
+          helm install pp-ci charts/pp \
+            --set image.repository=pp \
+            --set image.tag=ci \
+            --set image.pullPolicy=Never \
+            --wait --timeout 90s
+
+      - name: Smoke test deployed app
+        run: |
+          kubectl run curl-test --rm -i --restart=Never \
+            --image=curlimages/curl@sha256:c1fe1679c34d9784c1b0d1e5f62ac0a79fca01fb6377cdd33e90473c6f9f9a69 \
+            --command -- \
+            sh -c 'set -e
+              curl -sf http://pp-ci/api/version
+              room=$(curl -sf -X POST http://pp-ci/api/rooms)
+              echo "$room"
+              echo "$room" | grep -q roomId'
+
+      - name: Uninstall chart
+        if: always()
+        run: helm uninstall pp-ci --wait --timeout 60s || true

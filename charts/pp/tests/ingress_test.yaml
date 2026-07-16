@@ -1,0 +1,37 @@
+suite: ingress
+templates:
+  - ingress.yaml
+tests:
+  - it: renders nothing by default
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders a rule per configured host when enabled
+    set:
+      ingress.enabled: true
+      ingress.hosts:
+        - host: pp.example.com
+          paths:
+            - path: /
+              pathType: Prefix
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: spec.rules[0].host
+          value: pp.example.com
+      - equal:
+          path: spec.rules[0].http.paths[0].backend.service.port.number
+          value: 80
+
+  - it: attaches TLS config when provided
+    set:
+      ingress.enabled: true
+      ingress.tls:
+        - secretName: pp-tls
+          hosts: ["pp.example.com"]
+    asserts:
+      - equal:
+          path: spec.tls[0].secretName
+          value: pp-tls

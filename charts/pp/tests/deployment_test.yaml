@@ -1,0 +1,95 @@
+suite: deployment
+templates:
+  - deployment.yaml
+tests:
+  - it: renders exactly one replica by default
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 1
+
+  - it: uses the chart appVersion as the default image tag
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: ^ghcr\.io/kaiehrhardt/pp:[0-9]+\.[0-9]+\.[0-9]+$
+
+  - it: honors an explicit image tag override
+    set:
+      image.tag: v9.9.9
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: ghcr.io/kaiehrhardt/pp:v9.9.9
+
+  - it: exposes the app port and matching container port env var
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 3000
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: PORT
+            value: "3000"
+
+  - it: points liveness and readiness probes at the version endpoint
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].livenessProbe.httpGet.path
+          value: /api/version
+      - equal:
+          path: spec.template.spec.containers[0].readinessProbe.httpGet.path
+          value: /api/version
+
+  - it: mounts a writable /tmp when the root filesystem is read-only
+    set:
+      securityContext.readOnlyRootFilesystem: true
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: tmp
+            emptyDir: {}
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: tmp
+            mountPath: /tmp
+
+  - it: omits the tmp volume when the root filesystem is writable
+    set:
+      securityContext.readOnlyRootFilesystem: false
+    asserts:
+      - notExists:
+          path: spec.template.spec.volumes
+      - notExists:
+          path: spec.template.spec.containers[0].volumeMounts
+
+  - it: drops all capabilities and disallows privilege escalation
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation
+          value: false
+      - equal:
+          path: spec.template.spec.containers[0].securityContext.capabilities.drop
+          value: ["ALL"]
+
+  - it: omits spec.replicas when autoscaling is enabled so the HPA stays in control
+    set:
+      autoscaling.enabled: true
+    asserts:
+      - notExists:
+          path: spec.replicas
+
+  - it: passes through extra environment variables
+    set:
+      extraEnv:
+        - name: FOO
+          value: bar
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: FOO
+            value: bar

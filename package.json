@@ -24,7 +24,8 @@
     "@types/bun": "latest",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
-    "semantic-release": "25.0.7"
+    "semantic-release": "25.0.7",
+    "semantic-release-helm3": "2.10.0"
   },
   "peerDependencies": {
     "typescript": "7.0.2"
