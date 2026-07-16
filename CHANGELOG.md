@@ -1,3 +1,11 @@
+# [1.7.0](https://github.com/kaiehrhardt/pp/compare/1.6.2...1.7.0) (2026-07-16)
+
+
+### Features
+
+* add Helm chart with tests, PR validation, and automated GHCR release ([e82a121](https://github.com/kaiehrhardt/pp/commit/e82a12130568ddd85b9d956dd6dfb1db2b51db31))
+* add mini-games (unanimous-vote confetti, guess the average, RPS duels) ([e572563](https://github.com/kaiehrhardt/pp/commit/e5725637f01eb670dddce707872ab003f7446acf))
+
 ## [1.6.2](https://github.com/kaiehrhardt/pp/compare/1.6.1...1.6.2) (2026-07-16)
 
 
