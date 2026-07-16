@@ -7,6 +7,7 @@ import {
   computeEvaluation,
   createRoom,
   disconnectParticipant,
+  findParticipantByToken,
   isRoomExpired,
   isRoomFull,
   MAX_PARTICIPANTS,
@@ -287,5 +288,22 @@ describe("isRoomExpired", () => {
     const room = createRoom();
     room.emptySince = Date.now() - 31 * 60_000;
     expect(isRoomExpired(room)).toBe(true);
+  });
+});
+
+describe("findParticipantByToken", () => {
+  test("finds the participant whose token matches", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+    addParticipant(room, "Bob", false);
+
+    expect(findParticipantByToken(room, alice.token)).toBe(alice);
+  });
+
+  test("returns undefined when no participant has that token", () => {
+    const room = createRoom();
+    addParticipant(room, "Alice", false);
+
+    expect(findParticipantByToken(room, "no-such-token")).toBeUndefined();
   });
 });

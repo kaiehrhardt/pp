@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { parseChangelog } from "./changelog";
+import { parseChangelog, readChangelog } from "./changelog";
 
 const SAMPLE = `## [1.4.11](https://github.com/kaiehrhardt/terradot/compare/1.4.10...1.4.11) (2026-07-09)
 
@@ -75,5 +75,16 @@ describe("parseChangelog", () => {
 ${SAMPLE}`;
     const versions = parseChangelog(combined);
     expect(versions.map((v) => v.version)).toEqual(["1.0.0", "1.4.11", "1.4.0"]);
+  });
+});
+
+describe("readChangelog", () => {
+  test("parses an existing file from disk", async () => {
+    const versions = await readChangelog(`${import.meta.dir}/../../CHANGELOG.md`);
+    expect(versions.length).toBeGreaterThan(0);
+  });
+
+  test("returns an empty list when the file does not exist", async () => {
+    expect(await readChangelog(`${import.meta.dir}/does-not-exist.md`)).toEqual([]);
   });
 });
