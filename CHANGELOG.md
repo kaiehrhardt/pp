@@ -1,3 +1,11 @@
+# [1.1.0](https://github.com/kaiehrhardt/pp/compare/1.0.0...1.1.0) (2026-07-16)
+
+
+### Features
+
+* add room chat and animate the card reveal ([9ebc829](https://github.com/kaiehrhardt/pp/commit/9ebc829bf4848e5f04167cbc7d0e85e23bd54c83))
+* surface changelog in-app, add license and dependency automation ([3b4fa40](https://github.com/kaiehrhardt/pp/commit/3b4fa400e14a287234dcf836126d1d57a1cc1ce4))
+
 # 1.0.0 (2026-07-15)
 
 
