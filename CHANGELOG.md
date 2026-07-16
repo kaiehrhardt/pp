@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/kaiehrhardt/pp/compare/1.1.0...1.2.0) (2026-07-16)
+
+
+### Features
+
+* **ci:** build/test on feature branches and PRs instead of main ([4ea2fe0](https://github.com/kaiehrhardt/pp/commit/4ea2fe001ed0038eafa0f4135a94664a68e3f892))
+
 # [1.1.0](https://github.com/kaiehrhardt/pp/compare/1.0.0...1.1.0) (2026-07-16)
 
 
