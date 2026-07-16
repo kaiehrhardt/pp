@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "bun --hot src/server/index.ts",
     "start": "bun src/server/index.ts",
+    "test": "bun test",
     "release": "semantic-release",
     "docker:build": "docker build -t planning-poker .",
     "docker:run": "docker run --rm -p 3000:3000 planning-poker"
