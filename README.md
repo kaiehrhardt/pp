@@ -1,6 +1,26 @@
-# Planning Poker
+<div align="center">
+
+# 🃏 Planning Poker
+
+[![Release](https://github.com/kaiehrhardt/pp/actions/workflows/release.yml/badge.svg)](https://github.com/kaiehrhardt/pp/actions/workflows/release.yml)
+[![semantic-release](https://img.shields.io/badge/semantic--release-e10079?logo=semantic-release&logoColor=white)](https://github.com/semantic-release/semantic-release)
+[![Bun](https://img.shields.io/badge/Bun-000000?logo=bun&logoColor=white)](https://bun.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+
+</div>
 
 A web app for teams to estimate work together via Planning Poker in real time — built with Bun, React, and TypeScript. The UI itself is in German. See [CONTEXT.md](./CONTEXT.md) for the domain model and [docs/adr/](./docs/adr/) for the architectural decisions.
+
+## Features
+
+- Open a room, share the link, join in seconds — no accounts, no setup
+- Fibonacci deck (1–55, plus ☕ and ?), with automatic reveal once everyone's voted
+- Average + closest-card recommendation shown after every reveal
+- Spectator mode, host controls (new round, kick), automatic host handover if the host disconnects
+- Throw an emoji at another participant, animated flying from you to them
+- Built-in room chat with clickable links and an emoji picker
+- Dark mode only, on purpose — the "light mode" button is a running joke
+- Runs standalone via Bun, in Docker, or straight from the published image
 
 ## Prerequisites
 
@@ -32,7 +52,14 @@ bun run docker:build
 bun run docker:run
 ```
 
-Runs on [http://localhost:3000](http://localhost:3000) as well — in production mode, without hot reload. The port can be changed via the `PORT` environment variable (`-e PORT=8080 -p 8080:8080`).
+Or pull the latest published release instead of building locally:
+
+```bash
+docker pull ghcr.io/kaiehrhardt/pp:latest
+docker run --rm -p 3000:3000 ghcr.io/kaiehrhardt/pp:latest
+```
+
+Either way it runs on [http://localhost:3000](http://localhost:3000), in production mode, without hot reload. The port can be changed via the `PORT` environment variable (`-e PORT=8080 -p 8080:8080`).
 
 A GitHub Actions workflow (`.github/workflows/ci.yml`) runs on feature branches and pull requests (not on `main`): it first runs the typecheck and test suite, then — only if that passes — builds the image and pushes it to GitHub Container Registry, tagged `pr-<number>` for a pull request or `<commit-sha>` for a plain branch push. No extra secrets needed — it authenticates with the workflow's built-in `GITHUB_TOKEN`. The resulting package is private by default; change its visibility under the repo's "Packages" tab if you want it public.
 
@@ -53,9 +80,9 @@ bunx tsc --noEmit # typecheck across the whole project
 
 ```
 src/
-├── client/          # React UI (landing, join, room, card hand, emoji picker)
+├── client/          # React UI (landing, join, room, card hand, emoji picker, chat)
 └── server/
-    ├── domain/      # pure domain logic: Room, Participant, deck, evaluation
+    ├── domain/      # pure domain logic: Room, Participant, deck, evaluation, chat
     └── ws/          # WebSocket protocol & handler, wires the domain up to transport
 ```
 
