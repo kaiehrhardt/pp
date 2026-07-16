@@ -1,3 +1,10 @@
+## [1.6.2](https://github.com/kaiehrhardt/pp/compare/1.6.1...1.6.2) (2026-07-16)
+
+
+### Bug Fixes
+
+* text-only language toggle and fix toolbar overlap ([60bf801](https://github.com/kaiehrhardt/pp/commit/60bf8015213a49f2485a2e1bbb63bc9f9cf43a53))
+
 ## [1.6.1](https://github.com/kaiehrhardt/pp/compare/1.6.0...1.6.1) (2026-07-16)
 
 
