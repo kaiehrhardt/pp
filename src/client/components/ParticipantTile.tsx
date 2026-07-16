@@ -1,4 +1,5 @@
 import { useState, type CSSProperties } from "react";
+import { useTranslation } from "react-i18next";
 import type { Card } from "../../server/domain/types";
 import type { ParticipantDTO } from "../../server/ws/protocol";
 import { EmojiPicker } from "./EmojiPicker";
@@ -30,13 +31,14 @@ export function ParticipantTile({
   onReact,
   onKick,
 }: ParticipantTileProps) {
+  const { t } = useTranslation();
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const showVoteBadge = !participant.isSpectator && (revealed || participant.hasVoted);
   const voteValue = participant.vote !== null ? cardLabel(participant.vote) : "–";
 
   function handleKick() {
-    if (confirm(`${participant.name} wirklich aus dem Room werfen?`)) onKick();
+    if (confirm(t("participantTile.confirmKick", { name: participant.name }))) onKick();
   }
 
   return (
@@ -49,20 +51,22 @@ export function ParticipantTile({
         className="participant-tile-main"
         onClick={() => !isSelf && setPickerOpen((open) => !open)}
         disabled={isSelf}
-        title={isSelf ? undefined : `Smiley auf ${participant.name} werfen`}
+        title={isSelf ? undefined : t("participantTile.throwEmojiTitle", { name: participant.name })}
       >
         <span className="participant-avatar-wrap">
           <span className="participant-avatar" style={{ background: participant.color }}>
             {participant.name.slice(0, 1).toUpperCase()}
           </span>
           {isHost && (
-            <span className="host-badge" title="Host">
+            <span className="host-badge" title={t("participantTile.hostTitle")}>
               👑
             </span>
           )}
         </span>
         <span className="participant-name">{participant.name}</span>
-        {participant.isSpectator && <span className="participant-badge">Zuschauer</span>}
+        {participant.isSpectator && (
+          <span className="participant-badge">{t("participantTile.spectatorBadge")}</span>
+        )}
         {showVoteBadge && (
           <span
             className={`participant-vote${revealed ? " participant-vote-revealed" : ""}`}
@@ -80,7 +84,7 @@ export function ParticipantTile({
         <button
           type="button"
           className="kick-badge"
-          title={`${participant.name} kicken`}
+          title={t("participantTile.kickTitle", { name: participant.name })}
           onClick={handleKick}
         >
           ✕

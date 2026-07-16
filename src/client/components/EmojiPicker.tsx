@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { EMOJIS } from "../emojis";
 
 interface EmojiPickerProps {
@@ -7,6 +8,7 @@ interface EmojiPickerProps {
 }
 
 export function EmojiPicker({ onSelect, onClose }: EmojiPickerProps) {
+  const { t } = useTranslation();
   const [filter, setFilter] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -28,7 +30,7 @@ export function EmojiPicker({ onSelect, onClose }: EmojiPickerProps) {
       <input
         autoFocus
         type="text"
-        placeholder="Suchen…"
+        placeholder={t("emojiPicker.searchPlaceholder")}
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
         className="emoji-picker-search"
@@ -45,7 +47,7 @@ export function EmojiPicker({ onSelect, onClose }: EmojiPickerProps) {
             {e.emoji}
           </button>
         ))}
-        {results.length === 0 && <p className="emoji-picker-empty">Keine Treffer</p>}
+        {results.length === 0 && <p className="emoji-picker-empty">{t("emojiPicker.noResults")}</p>}
       </div>
     </div>
   );

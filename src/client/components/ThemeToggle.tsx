@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export function ThemeToggle() {
+  const { t } = useTranslation();
   const [showError, setShowError] = useState(false);
 
   return (
@@ -8,7 +10,7 @@ export function ThemeToggle() {
       <button
         type="button"
         className="theme-toggle"
-        title="Zu Lightmode wechseln"
+        title={t("themeToggle.buttonTitle")}
         onClick={() => setShowError(true)}
       >
         ☀️
@@ -18,10 +20,10 @@ export function ThemeToggle() {
         <div className="no-light-overlay" onClick={() => setShowError(false)}>
           <div className="no-light-modal" onClick={(e) => e.stopPropagation()}>
             <span className="no-light-emoji">😉</span>
-            <h2>Netter Versuch.</h2>
-            <p>Einen Lightmode gibt es hier nicht — und wird es auch nie geben.</p>
+            <h2>{t("themeToggle.modalTitle")}</h2>
+            <p>{t("themeToggle.modalBody")}</p>
             <button type="button" className="button-primary" onClick={() => setShowError(false)}>
-              Verstanden
+              {t("themeToggle.modalConfirm")}
             </button>
           </div>
         </div>

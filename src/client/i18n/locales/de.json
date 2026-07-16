@@ -1,0 +1,63 @@
+{
+  "app": {
+    "title": "Planning Poker"
+  },
+  "landing": {
+    "description": "Erstelle einen Room und teile den Link mit deinem Team.",
+    "createButton": "Neuen Room erstellen",
+    "creating": "Erstelle…",
+    "createError": "Room konnte nicht erstellt werden. Bitte nochmal versuchen."
+  },
+  "joinForm": {
+    "nameLabel": "Dein Name",
+    "namePlaceholder": "z. B. Alex",
+    "spectatorLabel": "Ich schaue nur zu",
+    "submitButton": "Raum betreten"
+  },
+  "room": {
+    "kickedMessage": "Der Host hat dich aus dem Room geworfen.",
+    "fullMessage": "Dieser Room ist bereits voll (maximal 15 Teilnehmer).",
+    "reconnecting": "Verbindung verloren, versuche erneut…",
+    "connecting": "Verbinde…",
+    "copyLinkCopied": "Link kopiert!",
+    "copyLinkDefault": "Link kopieren",
+    "recommendation": "🎯 Empfehlung: {{card}}",
+    "newRoundButton": "Neue Runde",
+    "spectatorToggleLabel": "Nur zuschauen"
+  },
+  "chatPanel": {
+    "title": "Chat",
+    "close": "Schließen",
+    "empty": "Noch keine Nachrichten.",
+    "emojiButtonTitle": "Smiley einfügen",
+    "messagePlaceholder": "Nachricht…",
+    "sendButton": "Senden"
+  },
+  "emojiPicker": {
+    "searchPlaceholder": "Suchen…",
+    "noResults": "Keine Treffer"
+  },
+  "participantTile": {
+    "confirmKick": "{{name}} wirklich aus dem Room werfen?",
+    "throwEmojiTitle": "Smiley auf {{name}} werfen",
+    "hostTitle": "Host",
+    "spectatorBadge": "Zuschauer",
+    "kickTitle": "{{name}} kicken"
+  },
+  "changelogModal": {
+    "title": "Changelog",
+    "close": "Schließen",
+    "loading": "Lade…",
+    "empty": "Noch kein Changelog vorhanden."
+  },
+  "themeToggle": {
+    "buttonTitle": "Zu Lightmode wechseln",
+    "modalTitle": "Netter Versuch.",
+    "modalBody": "Einen Lightmode gibt es hier nicht — und wird es auch nie geben.",
+    "modalConfirm": "Verstanden"
+  },
+  "languageToggle": {
+    "switchToEnglish": "Auf Englisch wechseln",
+    "switchToGerman": "Auf Deutsch wechseln"
+  }
+}

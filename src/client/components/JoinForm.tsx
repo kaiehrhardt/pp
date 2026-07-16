@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { JoinInfo } from "../useRoomSocket";
 
 interface JoinFormProps {
@@ -6,6 +7,7 @@ interface JoinFormProps {
 }
 
 export function JoinForm({ onSubmit }: JoinFormProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [isSpectator, setIsSpectator] = useState(false);
 
@@ -25,7 +27,7 @@ export function JoinForm({ onSubmit }: JoinFormProps) {
         </div>
         <form onSubmit={handleSubmit}>
           <label>
-            Dein Name
+            {t("joinForm.nameLabel")}
             <input
               autoFocus
               type="text"
@@ -33,7 +35,7 @@ export function JoinForm({ onSubmit }: JoinFormProps) {
               onChange={(e) => setName(e.target.value)}
               maxLength={40}
               required
-              placeholder="z. B. Alex"
+              placeholder={t("joinForm.namePlaceholder")}
             />
           </label>
           <label className="join-form-checkbox">
@@ -42,10 +44,10 @@ export function JoinForm({ onSubmit }: JoinFormProps) {
               checked={isSpectator}
               onChange={(e) => setIsSpectator(e.target.checked)}
             />
-            Ich schaue nur zu
+            {t("joinForm.spectatorLabel")}
           </label>
           <button type="submit" className="button-primary">
-            Raum betreten
+            {t("joinForm.submitButton")}
           </button>
         </form>
       </div>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { createRoom } from "../api";
 
 interface LandingProps {
@@ -6,6 +7,7 @@ interface LandingProps {
 }
 
 export function Landing({ navigate }: LandingProps) {
+  const { t } = useTranslation();
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,7 +18,7 @@ export function Landing({ navigate }: LandingProps) {
       const roomId = await createRoom();
       navigate(`/room/${roomId}`);
     } catch {
-      setError("Room konnte nicht erstellt werden. Bitte nochmal versuchen.");
+      setError(t("landing.createError"));
       setCreating(false);
     }
   }
@@ -28,9 +30,9 @@ export function Landing({ navigate }: LandingProps) {
           <span className="brand-logo">🃏</span>
           <h1>Planning Poker</h1>
         </div>
-        <p>Erstelle einen Room und teile den Link mit deinem Team.</p>
+        <p>{t("landing.description")}</p>
         <button type="button" className="button-primary" onClick={handleCreate} disabled={creating}>
-          {creating ? "Erstelle…" : "Neuen Room erstellen"}
+          {creating ? t("landing.creating") : t("landing.createButton")}
         </button>
         {error && (
           <p role="alert" className="error">

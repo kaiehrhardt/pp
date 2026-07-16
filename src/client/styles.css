@@ -630,6 +630,31 @@ button:disabled {
   }
 }
 
+.language-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 5.25rem;
+  z-index: 50;
+  height: 44px;
+  padding: 0 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--fg);
+  box-shadow: var(--shadow-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.language-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
 .theme-toggle {
   position: fixed;
   top: 1rem;
