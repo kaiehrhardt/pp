@@ -13,7 +13,7 @@ export function LanguageToggle() {
       title={next === "en" ? t("languageToggle.switchToEnglish") : t("languageToggle.switchToGerman")}
       onClick={() => setLanguage(next)}
     >
-      {language === "de" ? "🇩🇪 DE" : "🇬🇧 EN"}
+      {language === "de" ? "DE" : "EN"}
     </button>
   );
 }

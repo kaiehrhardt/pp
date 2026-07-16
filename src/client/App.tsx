@@ -25,8 +25,10 @@ export function App() {
 
   return (
     <>
-      <LanguageToggle />
-      <ThemeToggle />
+      <div className="top-toolbar">
+        <LanguageToggle />
+        <ThemeToggle />
+      </div>
       <VersionBadge />
       {roomMatch?.[1] ? <Room roomId={roomMatch[1]} /> : <Landing navigate={navigate} />}
     </>

@@ -203,7 +203,7 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.1rem 4.75rem 1.1rem 1.75rem;
+  padding: 1.1rem 9.5rem 1.1rem 1.75rem;
   background: color-mix(in srgb, var(--card-bg) 70%, transparent);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--card-border);
@@ -630,11 +630,17 @@ button:disabled {
   }
 }
 
-.language-toggle {
+.top-toolbar {
   position: fixed;
   top: 1rem;
-  right: 5.25rem;
+  right: 1rem;
   z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.language-toggle {
   height: 44px;
   padding: 0 0.9rem;
   border-radius: 999px;
@@ -656,10 +662,6 @@ button:disabled {
 }
 
 .theme-toggle {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  z-index: 50;
   width: 44px;
   height: 44px;
   border-radius: 50%;
