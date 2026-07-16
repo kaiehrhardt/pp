@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/kaiehrhardt/pp/compare/1.4.0...1.5.0) (2026-07-16)
+
+
+### Features
+
+* **ci:** enforce test coverage and upload lcov report ([288b326](https://github.com/kaiehrhardt/pp/commit/288b326ea07fb5bb0a4389904e5d3c912ed8b7bb))
+
 # [1.4.0](https://github.com/kaiehrhardt/pp/compare/1.3.0...1.4.0) (2026-07-16)
 
 
