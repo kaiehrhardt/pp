@@ -1,3 +1,15 @@
+# [1.4.0](https://github.com/kaiehrhardt/pp/compare/1.3.0...1.4.0) (2026-07-16)
+
+
+### Bug Fixes
+
+* annotate BunRequest type for /api/rooms/:id to satisfy type check ([ac69e2a](https://github.com/kaiehrhardt/pp/commit/ac69e2a692fbe8003e9c700ee720c56f25067b24))
+
+
+### Features
+
+* show a dedicated "room full" message in the client ([4f9c41c](https://github.com/kaiehrhardt/pp/commit/4f9c41c2198422f3a2d828f391d582e4c7b88547))
+
 # [1.3.0](https://github.com/kaiehrhardt/pp/compare/1.2.1...1.3.0) (2026-07-16)
 
 
