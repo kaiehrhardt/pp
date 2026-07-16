@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/kaiehrhardt/pp/compare/1.2.0...1.2.1) (2026-07-16)
+
+
+### Bug Fixes
+
+* **deps:** pin dependencies ([a9ccfcc](https://github.com/kaiehrhardt/pp/commit/a9ccfcc952a9c70563d7bb003fc94266c6a8a12a))
+
 # [1.2.0](https://github.com/kaiehrhardt/pp/compare/1.1.0...1.2.0) (2026-07-16)
 
 
