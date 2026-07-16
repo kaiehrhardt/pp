@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/kaiehrhardt/pp/compare/1.5.0...1.6.0) (2026-07-16)
+
+
+### Features
+
+* add German/English internationalization ([db79b11](https://github.com/kaiehrhardt/pp/commit/db79b117838234b2b5c02a85461eecfbc904eee2))
+
 # [1.5.0](https://github.com/kaiehrhardt/pp/compare/1.4.0...1.5.0) (2026-07-16)
 
 
