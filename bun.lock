@@ -5,11 +5,11 @@
     "": {
       "name": "pp",
       "dependencies": {
-        "i18next": "^26.3.6",
+        "i18next": "26.3.6",
         "nanoid": "6.0.0",
         "react": "19.2.7",
         "react-dom": "19.2.7",
-        "react-i18next": "^17.0.10",
+        "react-i18next": "17.0.10",
       },
       "devDependencies": {
         "@semantic-release/changelog": "6.0.3",
