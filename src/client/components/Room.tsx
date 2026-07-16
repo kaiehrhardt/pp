@@ -28,6 +28,7 @@ export function Room({ roomId }: RoomProps) {
     reactions,
     chatMessages,
     kicked,
+    roomFull,
     vote,
     toggleSpectator,
     newRound,
@@ -48,6 +49,15 @@ export function Room({ roomId }: RoomProps) {
       <main className="room-connecting">
         <span className="brand-logo">👢</span>
         <p>Der Host hat dich aus dem Room geworfen.</p>
+      </main>
+    );
+  }
+
+  if (roomFull) {
+    return (
+      <main className="room-connecting">
+        <span className="brand-logo">🙅</span>
+        <p>Dieser Room ist bereits voll (maximal 15 Teilnehmer).</p>
       </main>
     );
   }

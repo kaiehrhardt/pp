@@ -27,6 +27,7 @@ export function useRoomSocket(roomId: string, join: JoinInfo | null) {
   const [reactions, setReactions] = useState<ReactionEvent[]>([]);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [kicked, setKicked] = useState(false);
+  const [roomFull, setRoomFull] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
   const kickedRef = useRef(false);
 
@@ -37,12 +38,21 @@ export function useRoomSocket(roomId: string, join: JoinInfo | null) {
     let cancelled = false;
     let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
 
-    function connect() {
+    async function connect() {
       const params = new URLSearchParams({ roomId });
       const token = localStorage.getItem(tokenKey(roomId));
       if (token) {
         params.set("token", token);
       } else if (join) {
+        const res = await fetch(`/api/rooms/${roomId}`).catch(() => null);
+        if (cancelled) return;
+        if (res?.ok) {
+          const body: { full: boolean } = await res.json();
+          if (body.full) {
+            setRoomFull(true);
+            return;
+          }
+        }
         params.set("name", join.name);
         params.set("spectator", String(join.isSpectator));
       }
@@ -111,6 +121,7 @@ export function useRoomSocket(roomId: string, join: JoinInfo | null) {
     reactions,
     chatMessages,
     kicked,
+    roomFull,
     vote: useCallback((card: Card) => send({ type: "vote", card }), [send]),
     toggleSpectator: useCallback(() => send({ type: "toggleSpectator" }), [send]),
     newRound: useCallback(() => send({ type: "newRound" }), [send]),

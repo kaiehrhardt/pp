@@ -20,6 +20,13 @@ const server = Bun.serve<SocketData>({
         return Response.json({ roomId: room.id });
       },
     },
+    "/api/rooms/:id": {
+      GET(req) {
+        const room = store.get(req.params.id);
+        if (!room) return new Response("Room not found", { status: 404 });
+        return Response.json({ full: domain.isRoomFull(room) });
+      },
+    },
     "/api/version": {
       GET() {
         return Response.json({ version: pkg.version });
