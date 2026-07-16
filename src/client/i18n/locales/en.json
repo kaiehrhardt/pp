@@ -1,0 +1,63 @@
+{
+  "app": {
+    "title": "Planning Poker"
+  },
+  "landing": {
+    "description": "Create a room and share the link with your team.",
+    "createButton": "Create new room",
+    "creating": "Creating…",
+    "createError": "Could not create room. Please try again."
+  },
+  "joinForm": {
+    "nameLabel": "Your name",
+    "namePlaceholder": "e.g. Alex",
+    "spectatorLabel": "I'm just watching",
+    "submitButton": "Join room"
+  },
+  "room": {
+    "kickedMessage": "The host has removed you from the room.",
+    "fullMessage": "This room is already full (max. 15 participants).",
+    "reconnecting": "Connection lost, retrying…",
+    "connecting": "Connecting…",
+    "copyLinkCopied": "Link copied!",
+    "copyLinkDefault": "Copy link",
+    "recommendation": "🎯 Recommendation: {{card}}",
+    "newRoundButton": "New round",
+    "spectatorToggleLabel": "Spectator only"
+  },
+  "chatPanel": {
+    "title": "Chat",
+    "close": "Close",
+    "empty": "No messages yet.",
+    "emojiButtonTitle": "Insert emoji",
+    "messagePlaceholder": "Message…",
+    "sendButton": "Send"
+  },
+  "emojiPicker": {
+    "searchPlaceholder": "Search…",
+    "noResults": "No matches"
+  },
+  "participantTile": {
+    "confirmKick": "Really remove {{name}} from the room?",
+    "throwEmojiTitle": "Throw emoji at {{name}}",
+    "hostTitle": "Host",
+    "spectatorBadge": "Spectator",
+    "kickTitle": "Kick {{name}}"
+  },
+  "changelogModal": {
+    "title": "Changelog",
+    "close": "Close",
+    "loading": "Loading…",
+    "empty": "No changelog yet."
+  },
+  "themeToggle": {
+    "buttonTitle": "Switch to light mode",
+    "modalTitle": "Nice try.",
+    "modalBody": "There is no light mode here — and there never will be.",
+    "modalConfirm": "Understood"
+  },
+  "languageToggle": {
+    "switchToEnglish": "Switch to English",
+    "switchToGerman": "Switch to German"
+  }
+}

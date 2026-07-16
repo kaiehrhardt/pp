@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { ChatMessage } from "../../server/domain/types";
 import { linkHref, linkify } from "../linkify";
 import { EmojiPicker } from "./EmojiPicker";
@@ -26,6 +27,7 @@ function ChatMessageText({ text }: { text: string }) {
 }
 
 export function ChatPanel({ messages, selfId, onSend }: ChatPanelProps) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
   const [seenCount, setSeenCount] = useState(0);
@@ -55,14 +57,14 @@ export function ChatPanel({ messages, selfId, onSend }: ChatPanelProps) {
       {open && (
         <div className="chat-panel">
           <header className="chat-panel-header">
-            <h2>Chat</h2>
-            <button type="button" className="changelog-close" onClick={() => setOpen(false)} title="Schließen">
+            <h2>{t("chatPanel.title")}</h2>
+            <button type="button" className="changelog-close" onClick={() => setOpen(false)} title={t("chatPanel.close")}>
               ✕
             </button>
           </header>
 
           <div className="chat-messages" ref={listRef}>
-            {messages.length === 0 && <p className="chat-empty">Noch keine Nachrichten.</p>}
+            {messages.length === 0 && <p className="chat-empty">{t("chatPanel.empty")}</p>}
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -84,7 +86,7 @@ export function ChatPanel({ messages, selfId, onSend }: ChatPanelProps) {
                 type="button"
                 className="chat-emoji-toggle"
                 onClick={() => setPickerOpen((current) => !current)}
-                title="Smiley einfügen"
+                title={t("chatPanel.emojiButtonTitle")}
               >
                 😊
               </button>
@@ -102,17 +104,22 @@ export function ChatPanel({ messages, selfId, onSend }: ChatPanelProps) {
               type="text"
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder="Nachricht…"
+              placeholder={t("chatPanel.messagePlaceholder")}
               maxLength={500}
             />
             <button type="submit" className="button-primary">
-              Senden
+              {t("chatPanel.sendButton")}
             </button>
           </form>
         </div>
       )}
 
-      <button type="button" className="chat-toggle" onClick={() => setOpen((current) => !current)} title="Chat">
+      <button
+        type="button"
+        className="chat-toggle"
+        onClick={() => setOpen((current) => !current)}
+        title={t("chatPanel.title")}
+      >
         💬
         {unread > 0 && <span className="chat-unread">{unread}</span>}
       </button>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { ChangelogVersion } from "../../server/changelog";
 
 interface ChangelogModalProps {
@@ -6,6 +7,7 @@ interface ChangelogModalProps {
 }
 
 export function ChangelogModal({ onClose }: ChangelogModalProps) {
+  const { t } = useTranslation();
   const [versions, setVersions] = useState<ChangelogVersion[] | null>(null);
 
   useEffect(() => {
@@ -19,15 +21,15 @@ export function ChangelogModal({ onClose }: ChangelogModalProps) {
     <div className="changelog-overlay" onClick={onClose}>
       <div className="changelog-modal" onClick={(e) => e.stopPropagation()}>
         <header className="changelog-header">
-          <h2>Changelog</h2>
-          <button type="button" className="changelog-close" onClick={onClose} title="Schließen">
+          <h2>{t("changelogModal.title")}</h2>
+          <button type="button" className="changelog-close" onClick={onClose} title={t("changelogModal.close")}>
             ✕
           </button>
         </header>
 
         <div className="changelog-body">
-          {versions === null && <p className="changelog-empty">Lade…</p>}
-          {versions?.length === 0 && <p className="changelog-empty">Noch kein Changelog vorhanden.</p>}
+          {versions === null && <p className="changelog-empty">{t("changelogModal.loading")}</p>}
+          {versions?.length === 0 && <p className="changelog-empty">{t("changelogModal.empty")}</p>}
           {versions?.map((version) => (
             <section key={version.version} className="changelog-version">
               <h3>

@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useLocale } from "../i18n/useLocale";
 import type { JoinInfo } from "../useRoomSocket";
 import { tokenKey, useRoomSocket } from "../useRoomSocket";
 import { CardHand } from "./CardHand";
@@ -19,6 +21,8 @@ interface RoomProps {
 }
 
 export function Room({ roomId }: RoomProps) {
+  const { t } = useTranslation();
+  const { formatAverage } = useLocale();
   const [joinInfo, setJoinInfo] = useState<JoinInfo | null>(null);
   const [needsJoin] = useState(() => !localStorage.getItem(tokenKey(roomId)));
   const {
@@ -48,7 +52,7 @@ export function Room({ roomId }: RoomProps) {
     return (
       <main className="room-connecting">
         <span className="brand-logo">👢</span>
-        <p>Der Host hat dich aus dem Room geworfen.</p>
+        <p>{t("room.kickedMessage")}</p>
       </main>
     );
   }
@@ -57,7 +61,7 @@ export function Room({ roomId }: RoomProps) {
     return (
       <main className="room-connecting">
         <span className="brand-logo">🙅</span>
-        <p>Dieser Room ist bereits voll (maximal 15 Teilnehmer).</p>
+        <p>{t("room.fullMessage")}</p>
       </main>
     );
   }
@@ -66,7 +70,7 @@ export function Room({ roomId }: RoomProps) {
     return (
       <main className="room-connecting">
         <span className="brand-logo">🃏</span>
-        <p>{status === "closed" ? "Verbindung verloren, versuche erneut…" : "Verbinde…"}</p>
+        <p>{status === "closed" ? t("room.reconnecting") : t("room.connecting")}</p>
       </main>
     );
   }
@@ -96,7 +100,7 @@ export function Room({ roomId }: RoomProps) {
           <h1>Planning Poker</h1>
         </div>
         <button type="button" className="button-secondary" onClick={copyLink}>
-          {copied ? "Link kopiert!" : "Link kopieren"}
+          {copied ? t("room.copyLinkCopied") : t("room.copyLinkDefault")}
         </button>
       </header>
 
@@ -105,15 +109,15 @@ export function Room({ roomId }: RoomProps) {
           <div className="table-surface">
             {revealed && roomState.evaluation && (
               <div className="evaluation">
-                <div className="evaluation-average">Ø {roomState.evaluation.average.toFixed(1)}</div>
+                <div className="evaluation-average">Ø {formatAverage(roomState.evaluation.average)}</div>
                 <div className="evaluation-recommendation">
-                  🎯 Empfehlung: {roomState.evaluation.recommendedCard}
+                  {t("room.recommendation", { card: roomState.evaluation.recommendedCard })}
                 </div>
               </div>
             )}
             {isHost && revealed && (
               <button type="button" className="new-round-button" onClick={newRound}>
-                Neue Runde
+                {t("room.newRoundButton")}
               </button>
             )}
           </div>
@@ -152,7 +156,7 @@ export function Room({ roomId }: RoomProps) {
       <footer className="room-footer">
         <label className="spectator-toggle">
           <input type="checkbox" checked={self?.isSpectator ?? false} onChange={toggleSpectator} />
-          Nur zuschauen
+          {t("room.spectatorToggleLabel")}
         </label>
         <CardHand
           selected={self?.vote ?? null}
