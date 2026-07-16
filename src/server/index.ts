@@ -50,6 +50,7 @@ const server = Bun.serve<SocketData>({
     } else {
       const name = url.searchParams.get("name");
       if (!name) return new Response("name required", { status: 400 });
+      if (domain.isRoomFull(room)) return new Response("Room is full", { status: 403 });
       const isSpectator = url.searchParams.get("spectator") === "true";
       participant = domain.addParticipant(room, name, isSpectator);
     }

@@ -4,17 +4,26 @@ import type { Card, ChatMessage, Evaluation, NumericCard, Participant, Room } fr
 
 const AVATAR_COLORS = [
   "#e11d48",
+  "#f43f5e",
   "#f97316",
   "#eab308",
+  "#84cc16",
   "#22c55e",
+  "#10b981",
+  "#14b8a6",
   "#06b6d4",
+  "#0ea5e9",
   "#3b82f6",
+  "#6366f1",
   "#8b5cf6",
+  "#a855f7",
+  "#d946ef",
   "#ec4899",
 ];
 
 export const ROOM_ID_LENGTH = 12;
 export const GRACE_PERIOD_MS = 30 * 60 * 1000;
+export const MAX_PARTICIPANTS = 15;
 
 export function createRoom(): Room {
   return {
@@ -26,6 +35,10 @@ export function createRoom(): Room {
     createdAt: Date.now(),
     emptySince: null,
   };
+}
+
+export function isRoomFull(room: Room): boolean {
+  return room.participants.size >= MAX_PARTICIPANTS;
 }
 
 export function addParticipant(room: Room, name: string, isSpectator: boolean): Participant {
