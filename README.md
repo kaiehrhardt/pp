@@ -22,6 +22,16 @@ A web app for teams to estimate work together via Planning Poker in real time â€
 - Dark mode only, on purpose â€” the "light mode" button is a running joke
 - Runs standalone via Bun, in Docker, or straight from the published image
 
+## Screenshots
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/landing.jpg" alt="Landing page: create a new room"></td>
+    <td><img src="docs/screenshots/room-voting.jpg" alt="Room during voting, one participant has picked a card"></td>
+    <td><img src="docs/screenshots/room-revealed.jpg" alt="Room after reveal, showing the average and recommended card"></td>
+  </tr>
+</table>
+
 ## Prerequisites
 
 - [Bun](https://bun.com) v1.3 or newer (`bun --version`)
