@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/kaiehrhardt/pp/compare/1.6.0...1.6.1) (2026-07-16)
+
+
+### Bug Fixes
+
+* **deps:** pin dependencies ([55c06b7](https://github.com/kaiehrhardt/pp/commit/55c06b7dc1937faa1f7984c3a40fe45f4783646e))
+
 # [1.6.0](https://github.com/kaiehrhardt/pp/compare/1.5.0...1.6.0) (2026-07-16)
 
 
