@@ -20,8 +20,8 @@
     "@semantic-release/npm": "13.1.5",
     "@semantic-release/release-notes-generator": "14.1.1",
     "@types/bun": "latest",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
     "semantic-release": "25.0.7"
   },
   "peerDependencies": {
