@@ -33,6 +33,12 @@ This only fires on pushes to `main` (see `.github/workflows/release.yml`); commi
 
 A PR must contain exactly one commit. Don't rely on GitHub's squash-merge button — instead rebase/squash the feature branch itself down to a single commit (`git rebase -i`) before merging, so the branch already has one commit when the PR is opened/updated. The PR title must match that commit's message and follow Conventional Commits (e.g. `fix: ...`, `feat: ...`, `feat!: ...`), since that's what `semantic-release` sees on `main`.
 
+## README maintenance
+
+Before finishing any change, check whether `README.md` still matches reality — new/changed features, scripts, prerequisites, or UI flows described in the "Try it locally" walkthrough. Update it in the same commit/PR if it's out of date; otherwise leave it alone.
+
+The screenshots under `docs/screenshots/` (`landing.jpg`, `room-voting.jpg`, `room-revealed.jpg`) are real app captures, not mockups — if a change alters what those screens visually show (layout, new UI elements, avatars, toolbar, etc.), regenerate them: run `bun run dev`, drive the app with Playwright against the local Chromium at `/opt/pw-browsers/chromium-*/chrome-linux/chrome` (`chromium-cli` if available), and overwrite the existing files in place (same filenames/crop) rather than adding new ones.
+
 ## Agent skills
 
 ### Issue tracker
