@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Card, ChatMessage, RpsMove } from "../server/domain/types";
-import type { ClientMessage, RoomStateDTO, ServerMessage } from "../server/ws/protocol";
+import type { Card, ChatMessage, RpsMove } from "../backend/domain/types";
+import type { ClientMessage, RoomStateDTO, ServerMessage } from "../backend/ws/protocol";
 
 export interface JoinInfo {
   name: string;

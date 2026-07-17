@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { RpsMove } from "../../server/domain/types";
+import type { RpsMove } from "../../backend/domain/types";
 import type { ActiveDuel, DuelInvite, DuelPending, DuelResult } from "../useRoomSocket";
 
 const MOVE_EMOJI: Record<RpsMove, string> = { rock: "✊", paper: "✋", scissors: "✌️" };

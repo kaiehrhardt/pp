@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { ChatMessage } from "../../server/domain/types";
+import type { ChatMessage } from "../../backend/domain/types";
 import { linkHref, linkify } from "../linkify";
 import { EmojiPicker } from "./EmojiPicker";
 

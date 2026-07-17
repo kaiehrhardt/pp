@@ -1,4 +1,4 @@
-import homepage from "../client/index.html";
+import homepage from "../frontend/index.html";
 import pkg from "../../package.json";
 import { readChangelog } from "./changelog";
 import * as domain from "./domain/room";

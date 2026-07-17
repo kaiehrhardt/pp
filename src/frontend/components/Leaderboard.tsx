@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
-import type { ParticipantDTO } from "../../server/ws/protocol";
+import type { ParticipantDTO } from "../../backend/ws/protocol";
 
 const MEDALS = ["🥇", "🥈", "🥉"];
 
