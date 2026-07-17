@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import type { ParticipantDTO } from "../../server/ws/protocol";
 
@@ -49,13 +49,12 @@ export function Leaderboard({ participants }: LeaderboardProps) {
                 <div
                   key={participant.id}
                   className={`leaderboard-row${!participant.connected ? " leaderboard-row-disconnected" : ""}`}
+                  style={{ "--seat-color": participant.color } as CSSProperties}
                 >
                   <span className="leaderboard-rank">
                     {participant.trophyCount > 0 && MEDALS[index] ? MEDALS[index] : index + 1}
                   </span>
-                  <span className="leaderboard-avatar" style={{ background: participant.color }}>
-                    {participant.name.slice(0, 1).toUpperCase()}
-                  </span>
+                  <span className="leaderboard-avatar">{participant.avatar}</span>
                   <span className="leaderboard-name">{participant.name}</span>
                   <span className="leaderboard-count">
                     {participant.trophyCount > 0 ? `🏆 ${participant.trophyCount}` : "–"}

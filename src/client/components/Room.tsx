@@ -52,6 +52,7 @@ export function Room({ roomId }: RoomProps) {
     respondToRps,
     submitRpsMove,
     cancelRpsChallenge,
+    setAvatar,
   } = useRoomSocket(roomId, joinInfo);
 
   const roomLink = useMemo(() => `${location.origin}/room/${roomId}`, [roomId]);
@@ -170,6 +171,7 @@ export function Room({ roomId }: RoomProps) {
                   onReact={(emoji) => react(participant.id, emoji)}
                   onKick={() => kick(participant.id)}
                   onChallenge={() => challengeToRps(participant.id)}
+                  onSetAvatar={setAvatar}
                 />
               </div>
             );

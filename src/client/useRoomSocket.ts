@@ -5,6 +5,7 @@ import type { ClientMessage, RoomStateDTO, ServerMessage } from "../server/ws/pr
 export interface JoinInfo {
   name: string;
   isSpectator: boolean;
+  avatar: string;
 }
 
 export interface ReactionEvent {
@@ -90,6 +91,7 @@ export function useRoomSocket(roomId: string, join: JoinInfo | null) {
         }
         params.set("name", join.name);
         params.set("spectator", String(join.isSpectator));
+        params.set("avatar", join.avatar);
       }
 
       const protocol = location.protocol === "https:" ? "wss" : "ws";
@@ -218,6 +220,7 @@ export function useRoomSocket(roomId: string, join: JoinInfo | null) {
     kick: useCallback((participantId: string) => send({ type: "kick", participantId }), [send]),
     sendChat: useCallback((text: string) => send({ type: "chat", text }), [send]),
     guessAverage: useCallback((value: number) => send({ type: "guessAverage", value }), [send]),
+    setAvatar: useCallback((avatar: string) => send({ type: "setAvatar", avatar }), [send]),
     challengeToRps: useCallback((opponentId: string) => send({ type: "duelChallenge", opponentId }), [send]),
     respondToRps: useCallback(
       (duelId: string, accept: boolean) => {

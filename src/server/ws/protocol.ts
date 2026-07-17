@@ -12,7 +12,8 @@ export type ClientMessage =
   | { type: "duelChallenge"; opponentId: string }
   | { type: "duelRespond"; duelId: string; accept: boolean }
   | { type: "duelMove"; duelId: string; move: RpsMove }
-  | { type: "duelCancel"; duelId: string };
+  | { type: "duelCancel"; duelId: string }
+  | { type: "setAvatar"; avatar: string };
 
 export interface ParticipantDTO {
   id: string;
@@ -25,6 +26,7 @@ export interface ParticipantDTO {
   hasGuessed: boolean;
   guess: number | null;
   trophyCount: number;
+  avatar: string;
 }
 
 export interface RoomStateDTO {
@@ -84,6 +86,7 @@ export function toRoomStateDTO(room: Room, evaluation: Evaluation | null, viewer
       hasGuessed: p.guess !== null,
       guess: revealed || p.id === viewerId ? p.guess : null,
       trophyCount: p.trophyCount,
+      avatar: p.avatar,
     })),
   };
 }

@@ -8,15 +8,18 @@ import {
   computeEvaluation,
   computeGuessWinners,
   createRoom,
+  DEFAULT_AVATAR,
   disconnectParticipant,
   findParticipantByToken,
   isRoomExpired,
   isRoomFull,
   isUnanimousVote,
+  isValidAvatar,
   MAX_PARTICIPANTS,
   reconnectParticipant,
   removeParticipant,
   reveal,
+  setAvatar,
   startNewRound,
   toggleSpectator,
 } from "./room";
@@ -39,6 +42,46 @@ describe("addParticipant", () => {
     const second = addParticipant(room, "Bob", false);
     expect(room.hostId).toBe(first.id);
     expect(second.isSpectator).toBe(false);
+  });
+
+  test("uses the given avatar when valid", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false, "🦄");
+    expect(alice.avatar).toBe("🦄");
+  });
+
+  test("falls back to the default avatar when missing or invalid", () => {
+    const room = createRoom();
+    const noAvatar = addParticipant(room, "Alice", false);
+    expect(noAvatar.avatar).toBe(DEFAULT_AVATAR);
+
+    const tooLong = addParticipant(room, "Bob", false, "x".repeat(9));
+    expect(tooLong.avatar).toBe(DEFAULT_AVATAR);
+  });
+});
+
+describe("isValidAvatar", () => {
+  test("accepts non-empty strings up to 8 characters", () => {
+    expect(isValidAvatar("🦄")).toBe(true);
+    expect(isValidAvatar("x".repeat(8))).toBe(true);
+  });
+
+  test("rejects empty, too-long, or non-string values", () => {
+    expect(isValidAvatar("")).toBe(false);
+    expect(isValidAvatar("x".repeat(9))).toBe(false);
+    expect(isValidAvatar(undefined)).toBe(false);
+    expect(isValidAvatar(42)).toBe(false);
+  });
+});
+
+describe("setAvatar", () => {
+  test("updates the participant's avatar", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+
+    setAvatar(alice, "🐙");
+
+    expect(alice.avatar).toBe("🐙");
   });
 });
 

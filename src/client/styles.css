@@ -171,6 +171,42 @@ button:disabled {
   font-weight: 500 !important;
 }
 
+.join-form-avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.join-form-avatar-label {
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.join-form-avatar-anchor {
+  position: relative;
+}
+
+.join-form-avatar-button {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid var(--card-border);
+  background: var(--bg);
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.join-form-avatar-button:hover {
+  transform: scale(1.05);
+  border-color: var(--accent);
+}
+
 .auth-card input[type="text"] {
   padding: 0.7rem 0.85rem;
   border-radius: var(--radius-sm);
@@ -346,6 +382,10 @@ button:disabled {
   font: inherit;
 }
 
+.participant-tile-main-self {
+  cursor: default;
+}
+
 .kick-badge {
   position: absolute;
   top: -0.5em;
@@ -474,9 +514,11 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  background: var(--card-bg);
+  color: var(--fg);
   font-weight: 700;
-  box-shadow: 0 0 0 0.1875em var(--card-bg), var(--shadow-sm);
+  font-size: 1.1em;
+  box-shadow: 0 0 0 0.08em var(--seat-color, var(--accent)), var(--shadow-sm);
 }
 
 .host-badge {
@@ -485,6 +527,28 @@ button:disabled {
   right: -0.5em;
   font-size: 0.85em;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+}
+
+.avatar-edit-badge {
+  position: absolute;
+  bottom: -0.5em;
+  right: -0.5em;
+  width: 1.375em;
+  height: 1.375em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  font-size: 0.7em;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease;
+}
+
+.avatar-edit-badge:hover {
+  transform: scale(1.15);
 }
 
 .participant-name {
@@ -1323,9 +1387,11 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  background: var(--card-bg);
+  color: var(--fg);
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
+  box-shadow: 0 0 0 1px var(--seat-color, var(--accent));
 }
 
 .leaderboard-name {

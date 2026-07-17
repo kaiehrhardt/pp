@@ -9,6 +9,7 @@
     "createError": "Could not create room. Please try again."
   },
   "joinForm": {
+    "avatarLabel": "Choose an avatar",
     "nameLabel": "Your name",
     "namePlaceholder": "e.g. Alex",
     "spectatorLabel": "I'm just watching",
@@ -45,7 +46,8 @@
     "kickTitle": "Kick {{name}}",
     "guessWinnerBadge": "🔮 Closest guess",
     "rpsChallengeTitle": "Challenge {{name}} to Rock-Paper-Scissors",
-    "trophyTitle": "Trophies won: {{count}}"
+    "trophyTitle": "Trophies won: {{count}}",
+    "editAvatarTitle": "Change avatar"
   },
   "guessInput": {
     "placeholder": "Guess Ø",

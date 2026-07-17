@@ -9,6 +9,7 @@
     "createError": "Room konnte nicht erstellt werden. Bitte nochmal versuchen."
   },
   "joinForm": {
+    "avatarLabel": "Avatar wählen",
     "nameLabel": "Dein Name",
     "namePlaceholder": "z. B. Alex",
     "spectatorLabel": "Ich schaue nur zu",
@@ -45,7 +46,8 @@
     "kickTitle": "{{name}} kicken",
     "guessWinnerBadge": "🔮 Bester Tipp",
     "rpsChallengeTitle": "{{name}} zu Schnick-Schnack-Schnuck herausfordern",
-    "trophyTitle": "Gewonnene Pokale: {{count}}"
+    "trophyTitle": "Gewonnene Pokale: {{count}}",
+    "editAvatarTitle": "Avatar ändern"
   },
   "guessInput": {
     "placeholder": "Tipp Ø",

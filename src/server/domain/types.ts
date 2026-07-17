@@ -11,6 +11,7 @@ export interface Participant {
   guess: number | null;
   connected: boolean;
   trophyCount: number;
+  avatar: string;
 }
 
 export type RoomPhase = "voting" | "revealed";

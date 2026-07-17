@@ -26,6 +26,12 @@ const AVATAR_COLORS = [
 export const ROOM_ID_LENGTH = 12;
 export const GRACE_PERIOD_MS = 30 * 60 * 1000;
 export const MAX_PARTICIPANTS = 15;
+export const DEFAULT_AVATAR = "🙂";
+const MAX_AVATAR_LENGTH = 8;
+
+export function isValidAvatar(value: unknown): value is string {
+  return typeof value === "string" && value.length > 0 && value.length <= MAX_AVATAR_LENGTH;
+}
 
 export function createRoom(): Room {
   return {
@@ -44,7 +50,7 @@ export function isRoomFull(room: Room): boolean {
   return room.participants.size >= MAX_PARTICIPANTS;
 }
 
-export function addParticipant(room: Room, name: string, isSpectator: boolean): Participant {
+export function addParticipant(room: Room, name: string, isSpectator: boolean, avatar: string = ""): Participant {
   const participant: Participant = {
     id: nanoid(10),
     token: nanoid(21),
@@ -55,6 +61,7 @@ export function addParticipant(room: Room, name: string, isSpectator: boolean): 
     guess: null,
     connected: true,
     trophyCount: 0,
+    avatar: isValidAvatar(avatar) ? avatar : DEFAULT_AVATAR,
   };
   room.participants.set(participant.id, participant);
   if (room.hostId === null) room.hostId = participant.id;
@@ -114,6 +121,10 @@ export function castVote(participant: Participant, card: Card): void {
 
 export function castGuess(participant: Participant, value: number): void {
   participant.guess = value;
+}
+
+export function setAvatar(participant: Participant, avatar: string): void {
+  participant.avatar = avatar;
 }
 
 export function votingParticipants(room: Room): Participant[] {

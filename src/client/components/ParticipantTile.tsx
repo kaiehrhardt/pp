@@ -22,6 +22,7 @@ interface ParticipantTileProps {
   onReact: (emoji: string) => void;
   onKick: () => void;
   onChallenge: () => void;
+  onSetAvatar: (avatar: string) => void;
 }
 
 export function ParticipantTile({
@@ -36,9 +37,11 @@ export function ParticipantTile({
   onReact,
   onKick,
   onChallenge,
+  onSetAvatar,
 }: ParticipantTileProps) {
   const { t } = useTranslation();
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
 
   const showVoteBadge = !participant.isSpectator && (revealed || participant.hasVoted);
   const voteValue = participant.vote !== null ? cardLabel(participant.vote) : "–";
@@ -54,18 +57,35 @@ export function ParticipantTile({
     >
       <button
         type="button"
-        className="participant-tile-main"
+        className={`participant-tile-main${isSelf ? " participant-tile-main-self" : ""}`}
         onClick={() => !isSelf && setPickerOpen((open) => !open)}
-        disabled={isSelf}
         title={isSelf ? undefined : t("participantTile.throwEmojiTitle", { name: participant.name })}
       >
         <span className="participant-avatar-wrap">
-          <span className="participant-avatar" style={{ background: participant.color }}>
-            {participant.name.slice(0, 1).toUpperCase()}
-          </span>
+          <span className="participant-avatar">{participant.avatar}</span>
           {isHost && (
             <span className="host-badge" title={t("participantTile.hostTitle")}>
               👑
+            </span>
+          )}
+          {isSelf && (
+            <span
+              className="avatar-edit-badge"
+              role="button"
+              tabIndex={0}
+              title={t("participantTile.editAvatarTitle")}
+              onClick={(e) => {
+                e.stopPropagation();
+                setAvatarPickerOpen((open) => !open);
+              }}
+              onKeyDown={(e) => {
+                if (e.key !== "Enter" && e.key !== " ") return;
+                e.preventDefault();
+                e.stopPropagation();
+                setAvatarPickerOpen((open) => !open);
+              }}
+            >
+              ✏️
             </span>
           )}
         </span>
@@ -128,6 +148,16 @@ export function ParticipantTile({
             setPickerOpen(false);
           }}
           onClose={() => setPickerOpen(false)}
+        />
+      )}
+
+      {avatarPickerOpen && (
+        <EmojiPicker
+          onSelect={(emoji) => {
+            onSetAvatar(emoji);
+            setAvatarPickerOpen(false);
+          }}
+          onClose={() => setAvatarPickerOpen(false)}
         />
       )}
     </div>

@@ -248,6 +248,12 @@ export function createWebSocketHandlers(store: RoomStore) {
           send(room.id, duel.opponentId, { type: "duelCancelled", duelId: duel.id });
           return;
         }
+        case "setAvatar": {
+          if (!domain.isValidAvatar(message.avatar)) return;
+          domain.setAvatar(participant, message.avatar);
+          broadcastRoomState(room);
+          return;
+        }
         case "chat": {
           const text = message.text.trim();
           if (!text || text.length > MAX_CHAT_MESSAGE_LENGTH) return;
