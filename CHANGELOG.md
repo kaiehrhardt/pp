@@ -1,3 +1,13 @@
+# [1.8.0](https://github.com/kaiehrhardt/pp/compare/1.7.0...1.8.0) (2026-07-17)
+
+
+### Features
+
+* add session trophy leaderboard ([ebb47cf](https://github.com/kaiehrhardt/pp/commit/ebb47cfa25967e13ff886bad402530ab57613153))
+* award trophies for mini-game wins ([accbe58](https://github.com/kaiehrhardt/pp/commit/accbe5813d1ed70bbf3b5154bcfffe98d56d4e2b))
+* let participants choose an emoji avatar ([3a8189e](https://github.com/kaiehrhardt/pp/commit/3a8189eaf884f52eede93e7e59d49956f9d4340d))
+* scale poker table and participant tiles with window size ([6dd223d](https://github.com/kaiehrhardt/pp/commit/6dd223dd0389bc94c030bbad86d021ec86f46225))
+
 # [1.7.0](https://github.com/kaiehrhardt/pp/compare/1.6.2...1.7.0) (2026-07-16)
 
 
