@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches-ignore: [main]
+    branches: [main]
   pull_request:
 
 permissions:
@@ -87,7 +87,7 @@ jobs:
         uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
 
       - name: Install helm-unittest plugin
-        run: helm plugin install https://github.com/helm-unittest/helm-unittest --version v1.1.1
+        run: helm plugin install https://github.com/helm-unittest/helm-unittest --version v1.1.1 --verify=false
 
       - name: Lint chart
         run: helm lint charts/pp
