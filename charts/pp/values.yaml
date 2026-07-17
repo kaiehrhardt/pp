@@ -10,7 +10,7 @@ image:
   repository: ghcr.io/kaiehrhardt/pp
   pullPolicy: IfNotPresent
   # -- Overrides the image tag; defaults to the chart's appVersion.
-  tag: ""
+  tag: "@sha256:c35b17e97bb9ff9c53bddc3c26dfa3b269975767be95c7b8af7f36aa56e69b2f"
 
 imagePullSecrets: []
 nameOverride: ""
