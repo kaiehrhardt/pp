@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/kaiehrhardt/pp/compare/1.8.0...1.8.1) (2026-07-17)
+
+
+### Bug Fixes
+
+* **ci:** don't require plugin verification for helm-unittest and run CI push trigger only on main ([efa5a5f](https://github.com/kaiehrhardt/pp/commit/efa5a5f4aaab0b27bc8ace663aea45bf66c55cf3))
+
 # [1.8.0](https://github.com/kaiehrhardt/pp/compare/1.7.0...1.8.0) (2026-07-17)
 
 
