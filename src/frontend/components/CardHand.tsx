@@ -1,5 +1,5 @@
-import { DECK } from "../../server/domain/deck";
-import type { Card } from "../../server/domain/types";
+import { DECK } from "../../backend/domain/deck";
+import type { Card } from "../../backend/domain/types";
 
 function label(card: Card): string {
   if (card === "coffee") return "☕";

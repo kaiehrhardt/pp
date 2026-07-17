@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { ChangelogVersion } from "../../server/changelog";
+import type { ChangelogVersion } from "../../backend/changelog";
 
 interface ChangelogModalProps {
   onClose: () => void;

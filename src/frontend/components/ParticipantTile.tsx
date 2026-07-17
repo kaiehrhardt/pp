@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
-import type { Card } from "../../server/domain/types";
-import type { ParticipantDTO } from "../../server/ws/protocol";
+import type { Card } from "../../backend/domain/types";
+import type { ParticipantDTO } from "../../backend/ws/protocol";
 import { EmojiPicker } from "./EmojiPicker";
 
 function cardLabel(card: Card): string {

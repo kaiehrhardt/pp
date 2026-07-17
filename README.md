@@ -90,8 +90,8 @@ bunx tsc --noEmit # typecheck across the whole project
 
 ```
 src/
-├── client/          # React UI (landing, join, room, card hand, emoji picker, chat)
-└── server/
+├── frontend/        # React UI (landing, join, room, card hand, emoji picker, chat)
+└── backend/
     ├── domain/      # pure domain logic: Room, Participant, deck, evaluation, chat
     └── ws/          # WebSocket protocol & handler, wires the domain up to transport
 ```
