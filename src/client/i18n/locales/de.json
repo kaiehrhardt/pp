@@ -87,5 +87,10 @@
   "languageToggle": {
     "switchToEnglish": "Auf Englisch wechseln",
     "switchToGerman": "Auf Deutsch wechseln"
+  },
+  "leaderboard": {
+    "title": "Bestenliste",
+    "close": "Schließen",
+    "empty": "Noch keine Pokale gewonnen."
   }
 }

@@ -8,6 +8,7 @@ import { ChatPanel } from "./ChatPanel";
 import { Confetti } from "./Confetti";
 import { GuessInput } from "./GuessInput";
 import { JoinForm } from "./JoinForm";
+import { Leaderboard } from "./Leaderboard";
 import { ParticipantTile } from "./ParticipantTile";
 import { RpsDuelOverlay } from "./RpsDuelOverlay";
 import type { SeatPosition } from "./ThrownEmoji";
@@ -127,6 +128,8 @@ export function Room({ roomId }: RoomProps) {
       </header>
 
       <div className="table-area">
+        <Leaderboard participants={roomState.participants} />
+
         <div className="table">
           <div className="table-surface">
             {revealed && roomState.evaluation && (

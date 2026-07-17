@@ -87,5 +87,10 @@
   "languageToggle": {
     "switchToEnglish": "Switch to English",
     "switchToGerman": "Switch to German"
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "close": "Close",
+    "empty": "No trophies won yet."
   }
 }
