@@ -44,7 +44,8 @@
     "spectatorBadge": "Spectator",
     "kickTitle": "Kick {{name}}",
     "guessWinnerBadge": "🔮 Closest guess",
-    "rpsChallengeTitle": "Challenge {{name}} to Rock-Paper-Scissors"
+    "rpsChallengeTitle": "Challenge {{name}} to Rock-Paper-Scissors",
+    "trophyTitle": "Trophies won: {{count}}"
   },
   "guessInput": {
     "placeholder": "Guess Ø",

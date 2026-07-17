@@ -7,6 +7,7 @@ import {
   findActiveDuelFor,
   isMatchOver,
   isValidRpsMove,
+  matchWinnerId,
   recordRoundResult,
   removeDuel,
   resolveRound,
@@ -235,6 +236,32 @@ describe("recordRoundResult / isMatchOver", () => {
 
     recordRoundResult(duel, alice.id);
     expect(isMatchOver(duel)).toBe(true);
+  });
+});
+
+describe("matchWinnerId", () => {
+  test("is null before either side has reached the wins needed", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+    const bob = addParticipant(room, "Bob", false);
+    const duel = createDuel(room, alice.id, bob.id)!;
+    acceptDuel(duel);
+
+    expect(matchWinnerId(duel)).toBeNull();
+  });
+
+  test("returns the id of the side that reached the wins needed", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+    const bob = addParticipant(room, "Bob", false);
+    const duel = createDuel(room, alice.id, bob.id)!;
+    acceptDuel(duel);
+
+    for (let i = 0; i < RPS_WINS_NEEDED; i++) {
+      recordRoundResult(duel, alice.id);
+    }
+
+    expect(matchWinnerId(duel)).toBe(alice.id);
   });
 });
 

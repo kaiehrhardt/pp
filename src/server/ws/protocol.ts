@@ -24,6 +24,7 @@ export interface ParticipantDTO {
   vote: Card | null;
   hasGuessed: boolean;
   guess: number | null;
+  trophyCount: number;
 }
 
 export interface RoomStateDTO {
@@ -82,6 +83,7 @@ export function toRoomStateDTO(room: Room, evaluation: Evaluation | null, viewer
       vote: revealed || p.id === viewerId ? p.vote : null,
       hasGuessed: p.guess !== null,
       guess: revealed || p.id === viewerId ? p.guess : null,
+      trophyCount: p.trophyCount,
     })),
   };
 }

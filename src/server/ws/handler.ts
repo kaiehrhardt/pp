@@ -233,7 +233,12 @@ export function createWebSocketHandlers(store: RoomStore) {
           duelDomain.recordRoundResult(duel, winnerId);
           const matchOver = duelDomain.isMatchOver(duel);
           sendDuelResult(room, duel, moves, winnerId, matchOver);
-          if (matchOver) duelDomain.removeDuel(room, duel.id);
+          if (matchOver) {
+            const matchWinnerId = duelDomain.matchWinnerId(duel);
+            if (matchWinnerId) room.participants.get(matchWinnerId)!.trophyCount += 1;
+            duelDomain.removeDuel(room, duel.id);
+            broadcastRoomState(room);
+          }
           return;
         }
         case "duelCancel": {

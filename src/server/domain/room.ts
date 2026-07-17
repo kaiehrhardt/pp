@@ -54,6 +54,7 @@ export function addParticipant(room: Room, name: string, isSpectator: boolean): 
     vote: null,
     guess: null,
     connected: true,
+    trophyCount: 0,
   };
   room.participants.set(participant.id, participant);
   if (room.hostId === null) room.hostId = participant.id;
@@ -133,6 +134,14 @@ export function isUnanimousVote(room: Room): boolean {
 
 export function reveal(room: Room): void {
   room.phase = "revealed";
+
+  const evaluation = computeEvaluation(room);
+  for (const id of computeGuessWinners(room, evaluation)) {
+    room.participants.get(id)!.trophyCount += 1;
+  }
+  if (isUnanimousVote(room)) {
+    for (const participant of votingParticipants(room)) participant.trophyCount += 1;
+  }
 }
 
 export function startNewRound(room: Room): void {

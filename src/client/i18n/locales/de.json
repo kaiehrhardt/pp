@@ -44,7 +44,8 @@
     "spectatorBadge": "Zuschauer",
     "kickTitle": "{{name}} kicken",
     "guessWinnerBadge": "🔮 Bester Tipp",
-    "rpsChallengeTitle": "{{name}} zu Schnick-Schnack-Schnuck herausfordern"
+    "rpsChallengeTitle": "{{name}} zu Schnick-Schnack-Schnuck herausfordern",
+    "trophyTitle": "Gewonnene Pokale: {{count}}"
   },
   "guessInput": {
     "placeholder": "Tipp Ø",

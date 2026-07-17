@@ -508,6 +508,11 @@ button:disabled {
   background: color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
+.participant-badge-trophy {
+  color: #fbbf24;
+  background: color-mix(in srgb, #eab308 22%, transparent);
+}
+
 .guess-input {
   display: flex;
   align-items: center;

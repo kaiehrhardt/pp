@@ -70,6 +70,14 @@ export function ParticipantTile({
           )}
         </span>
         <span className="participant-name">{participant.name}</span>
+        {participant.trophyCount > 0 && (
+          <span
+            className="participant-badge participant-badge-trophy"
+            title={t("participantTile.trophyTitle", { count: participant.trophyCount })}
+          >
+            🏆 {participant.trophyCount}
+          </span>
+        )}
         {participant.isSpectator && (
           <span className="participant-badge">{t("participantTile.spectatorBadge")}</span>
         )}

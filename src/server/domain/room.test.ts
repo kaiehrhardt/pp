@@ -227,6 +227,52 @@ describe("removeParticipant", () => {
   });
 });
 
+describe("reveal", () => {
+  test("awards a trophy to the closest guesser(s)", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+    const bob = addParticipant(room, "Bob", false);
+    castVote(alice, 5);
+    castVote(bob, 8);
+    castGuess(alice, 8);
+    castGuess(bob, 6.5);
+
+    reveal(room);
+
+    expect(bob.trophyCount).toBe(1);
+    expect(alice.trophyCount).toBe(0);
+  });
+
+  test("awards a trophy to every voter on a unanimous vote", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+    const bob = addParticipant(room, "Bob", false);
+    castVote(alice, "coffee");
+    castVote(bob, "coffee");
+
+    reveal(room);
+
+    expect(alice.trophyCount).toBe(1);
+    expect(bob.trophyCount).toBe(1);
+  });
+
+  test("trophies accumulate across rounds and are not reset by startNewRound", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+    const bob = addParticipant(room, "Bob", false);
+    castVote(alice, "coffee");
+    castVote(bob, "coffee");
+    reveal(room);
+    startNewRound(room);
+    castVote(alice, "coffee");
+    castVote(bob, "coffee");
+    reveal(room);
+
+    expect(alice.trophyCount).toBe(2);
+    expect(bob.trophyCount).toBe(2);
+  });
+});
+
 describe("startNewRound", () => {
   test("resets phase to voting and clears every vote and guess", () => {
     const room = createRoom();

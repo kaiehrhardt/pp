@@ -79,3 +79,10 @@ export function recordRoundResult(duel: Duel, winnerId: string | null): void {
 export function isMatchOver(duel: Duel): boolean {
   return [...duel.wins.values()].some((wins) => wins >= RPS_WINS_NEEDED);
 }
+
+export function matchWinnerId(duel: Duel): string | null {
+  for (const [id, wins] of duel.wins) {
+    if (wins >= RPS_WINS_NEEDED) return id;
+  }
+  return null;
+}
