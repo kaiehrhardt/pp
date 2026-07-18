@@ -5,7 +5,7 @@ A web app for teams to estimate work together via Planning Poker in real time.
 ## Language
 
 **Room**:
-A session a user opens, which others join via a link. Groups all participants and the flow of an estimation round. Stays alive as long as at least one participant is connected.
+A session a user opens, which others join via a link. Groups all participants and the flow of an estimation round. Stays alive as long as at least one participant is connected, plus a further 30-minute grace period after the last one disconnects, in case everyone reconnects.
 _Avoid_: Table (a purely visual metaphor in the UI, not a domain object in its own right), Session
 
 **Host**:
@@ -15,7 +15,7 @@ The participant in control of the round flow (e.g. starting a new round). Origin
 The automatic uncovering of all chosen cards once every participant has voted. Not a manually triggered step.
 
 **Participant**:
-A user who has joined a room via its link and chosen a name. Gets a random Seat color for distinction, plus an Avatar (defaulting to 🙂); names don't need to be unique. Keeps their identity (name, Seat color, Avatar, host status if applicable) across brief disconnects/reloads via a token in `localStorage`.
+A user who has joined a room via its link and chosen a name. Gets a random Seat color for distinction, plus an Avatar (defaulting to 🙂); names don't need to be unique. Keeps their identity (name, Seat color, Avatar, host status if applicable, Trophy count) across disconnects/reloads via a token in `localStorage` — reconnection has no time limit of its own, it just requires the Room itself to still be alive.
 
 **Vote**:
 The card a participant picked from the Fibonacci deck (1, 2, 3, 5, 8, 13, 21, 34, 55, ☕, ?). Before the reveal, only *whether* a participant has voted is visible, not the value.
@@ -26,7 +26,7 @@ The summary computed after a reveal: the average of all numeric votes (☕/? exc
 _Avoid_: Consensus (concept was dropped in favor of the recommendation)
 
 **Spectator**:
-A participant who isn't estimating and therefore doesn't factor into the auto-reveal condition ("everyone has voted"). Chosen via a checkbox at join time, or toggled on/off at any point during the session. Can still throw reactions.
+A participant who isn't estimating and therefore doesn't factor into the auto-reveal condition ("everyone has voted"). Chosen via a checkbox at join time, or toggled on/off at any point during the session — toggling doesn't clear an existing Vote, it just excludes it from the count while active, so switching back before Reveal silently restores it. Toggling into Spectator mode can itself trigger a Reveal, the same way a Kick can, if you were the last one yet to vote. Can still throw and receive Reactions, and can Duel.
 _Avoid_: Observer, Watcher
 
 **Chat**:
@@ -37,7 +37,7 @@ A participant's optional, secret prediction of what the round's Evaluation avera
 _Note_: distinct from Evaluation — a Guess is a participant's prediction *of* the average, not the computed average/recommendation itself.
 
 **Duel**:
-A private, best-of-three Rock-Paper-Scissors side-game between two participants, started as a challenge the other side can accept or decline. Runs until one side wins two rounds (draws are replayed without counting); the running score is shown throughout. Purely for fun while waiting for votes — has no effect on votes, Reveal, or the Evaluation, and isn't limited to voting participants (Spectators can duel too).
+A private, best-of-three Rock-Paper-Scissors side-game between two participants, started as a challenge the other side can accept or decline. Runs until one side wins two rounds (draws are replayed without counting); the running score is shown throughout. Purely for fun while waiting for votes — has no effect on votes, Reveal, or the Evaluation, and isn't limited to voting participants (Spectators can duel too). If either side disconnects before the match finishes, the Duel is simply cancelled outright — a wash, not a forfeit-win for whoever's left, and no Trophy changes hands. Only *starting* a Duel requires the Room to be in the voting phase — once accepted, a Duel runs on its own clock, unaffected by a Reveal or even a new round starting; it ends only by completing, being cancelled, or a side disconnecting/getting Kicked.
 _Avoid_: Game (too generic — could be read as referring to the planning poker round itself)
 
 **Unanimous vote**:
@@ -55,3 +55,11 @@ _Avoid_: Icon, Emoji (Avatar is the domain concept; the emoji is just its repres
 **Seat color**:
 A random color assigned to a participant at join for visual distinction, unrelated to their Avatar choice. Originally a solid fill behind the participant's initial; now rendered as a thin ring around the Avatar instead, since a solid fill would clash with an arbitrary emoji.
 _Avoid_: Avatar color (renamed to avoid colliding with the new Avatar concept), Color alone (ambiguous with Card/Vote values)
+
+**Reaction**:
+An emoji thrown from one participant at another specific participant — always one-to-one, never room-wide and never at yourself (blocked client-side; the server only checks the target exists in the Room). Picked from the same curated emoji list as Avatar, but unrelated in purpose: a Reaction is a one-off thrown gesture, not a standing identity marker. Purely ephemeral — relayed live over the socket and animated flying between the two participants' seats for 1.5 seconds, then gone; never stored in Room state. Any participant can throw or be targeted, Spectators included, and a disconnected-but-not-yet-removed participant can still be targeted.
+_Avoid_: Emoji burst, Broadcast (a Reaction is always targeted at one participant, not sent to the room at large)
+
+**Kick**:
+A host-only, immediate, and permanent removal of a participant from the Room — deliberately bypassing the disconnect/reconnect grace period the rest of this domain relies on. The kicked participant's stored token is wiped client-side, so rejoining via the room link creates a brand-new Participant with no link to the old one: Trophy count, Avatar, and Seat color are all lost, not restored. Cancels any Duel the kicked participant was in. If they were the last voting participant yet to vote, their removal can itself trigger a Reveal, exactly as if they had voted.
+_Avoid_: Ban, Remove (Kick is the term already used in the UI and protocol)
