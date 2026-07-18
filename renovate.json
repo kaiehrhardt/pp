@@ -13,6 +13,11 @@
       "minimumReleaseAge": "7 days",
       "matchUpdateTypes": ["patch", "minor"],
       "automerge": true
+    },
+    {
+      "description": "Don't manage the chart's own image: tag defaults to \"\" and resolves via appVersion, so pinning it to a digest here breaks that default",
+      "matchPackageNames": ["ghcr.io/kaiehrhardt/pp"],
+      "enabled": false
     }
   ],
   "prConcurrentLimit": 5,
