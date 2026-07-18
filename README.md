@@ -21,7 +21,7 @@ A web app for teams to estimate work together via Planning Poker in real time �
 - Mini-games while you wait: guess the round's average, challenge someone to a Rock-Paper-Scissors duel, confetti on a unanimous vote — with a session trophy leaderboard
 - Built-in room chat with clickable links and an emoji picker
 - German/English language toggle; dark mode only, on purpose — the "light mode" button is a running joke
-- Runs standalone via Bun, in Docker/Kubernetes (Helm chart included, see [charts/pp](./charts/pp)), or straight from the published image
+- Runs standalone via Bun, via Docker Compose (single host, includes Turso + Redis), in Kubernetes (Helm chart included, see [charts/pp](./charts/pp)), or straight from the published image
 
 ## Screenshots
 
@@ -40,6 +40,8 @@ A web app for teams to estimate work together via Planning Poker in real time �
 ## Prerequisites
 
 - [Bun](https://bun.com) v1.3 or newer (`bun --version`)
+- A reachable Redis (or [Valkey](https://valkey.io)) instance — the app pings it at boot and won't start without one. `redis-server` locally, or see [Docker Compose](#docker-compose) below for a zero-setup option.
+- No Turso account needed for local dev: `TURSO_DATABASE_URL` defaults to a local file (`file:./dev.db`), created automatically on first run.
 
 ## Try it locally
 
@@ -48,7 +50,7 @@ bun install
 bun run dev
 ```
 
-The server starts with hot reload on [http://localhost:3000](http://localhost:3000).
+The server starts with hot reload on [http://localhost:3000](http://localhost:3000). Room state is stored in `./dev.db` (a local libSQL file, gitignored) and cross-connection events flow through your local Redis.
 
 To try the full flow (create a room, join, estimate, throw smileys) you need at least two browser windows/tabs, since each tab simulates its own participant:
 
@@ -60,21 +62,34 @@ To try the full flow (create a room, join, estimate, throw smileys) you need at 
 
 An incognito window matters because the reconnect token lives in `localStorage` per room — two normal tabs in the same browser profile would otherwise reuse the same participant instead of joining a second one.
 
-## In a container
+## Docker Compose
+
+The easiest way to run the whole stack (app + Turso via a local [sqld](https://github.com/tursodatabase/libsql) server + Redis) on one host — either for local debugging or as a lightweight alternative to Kubernetes:
+
+```bash
+bun run compose       # production-like, builds from source: docker-compose.yml alone
+bun run compose:dev   # debugging: adds docker-compose.dev.yml on top (hot reload, live-mounted src)
+bun run compose:prod  # production, no local build: docker-compose.prod.yml, pulls ghcr.io/kaiehrhardt/pp:latest
+```
+
+Runs on [http://localhost:3000](http://localhost:3000) either way. `compose` is what a plain `docker compose up` gives you too — the dev overlay is a separate, explicitly-named file (not the auto-loading `docker-compose.override.yml`) so a single-host operator never gets a hot-reload build by accident. `compose:prod` is a standalone file (not an overlay — Compose can't remove the base file's `build:` key) meant to be copied to a host on its own, with no need for a full clone of this repo; edit its `image:` line to pin a specific released version instead of floating on `:latest`. Room state persists in a named volume (`sqld-data`) across `docker compose restart`/`down` (not `down -v`). See [ADR-0003](./docs/adr/0003-turso-and-redis-for-horizontal-scaling.md) for why Turso and Redis are there at all.
+
+## In a single container
 
 ```bash
 bun run docker:build
-bun run docker:run
 ```
 
-Or pull the latest published release instead of building locally:
+This builds just the app image — it still needs a reachable Turso (or `sqld`) database and Redis instance, since there's no in-memory fallback (see [ADR-0003](./docs/adr/0003-turso-and-redis-for-horizontal-scaling.md)). `bun run docker:run` (and the equivalent `docker run ghcr.io/kaiehrhardt/pp:latest` using the published image) will crash-loop without `-e REDIS_URL=...` reachable from inside the container, e.g.:
 
 ```bash
-docker pull ghcr.io/kaiehrhardt/pp:latest
-docker run --rm -p 3000:3000 ghcr.io/kaiehrhardt/pp:latest
+docker run --rm -p 3000:3000 \
+  -e REDIS_URL=redis://host.docker.internal:6379 \
+  -e TURSO_DATABASE_URL=http://host.docker.internal:8080 \
+  ghcr.io/kaiehrhardt/pp:latest
 ```
 
-Either way it runs on [http://localhost:3000](http://localhost:3000), in production mode, without hot reload. The port can be changed via the `PORT` environment variable (`-e PORT=8080 -p 8080:8080`).
+Unless `TURSO_DATABASE_URL` is set, it falls back to an in-container local file (`file:./dev.db`) that's lost when the container is removed — fine for a quick check, not for anything you want to keep. For anything beyond a one-off, use [Docker Compose](#docker-compose) above instead, which wires all of this up for you. The port can be changed via the `PORT` environment variable (`-e PORT=8080 -p 8080:8080`).
 
 A GitHub Actions workflow (`.github/workflows/ci.yml`) runs on feature branches and pull requests (not on `main`): it first runs the typecheck and test suite, then — only if that passes — builds the image and pushes it to GitHub Container Registry, tagged `pr-<number>` for a pull request or `<commit-sha>` for a plain branch push. No extra secrets needed — it authenticates with the workflow's built-in `GITHUB_TOKEN`. The resulting package is private by default; change its visibility under the repo's "Packages" tab if you want it public.
 
@@ -84,7 +99,7 @@ A GitHub Actions workflow (`.github/workflows/ci.yml`) runs on feature branches 
 helm install pp oci://ghcr.io/kaiehrhardt/charts/pp --version <chart-version>
 ```
 
-See [charts/pp/README.md](./charts/pp/README.md) for values and the single-replica caveat (room state is in-memory per pod, see ADR-0001).
+See [charts/pp/README.md](./charts/pp/README.md) for values — multi-replica deployments need Turso and Redis wired up (room state lives in Turso, cross-pod events flow through Redis; see [ADR-0003](./docs/adr/0003-turso-and-redis-for-horizontal-scaling.md)), either an external `TURSO_DATABASE_URL`/`TURSO_AUTH_TOKEN`/`REDIS_URL` via `extraEnv`, or `redis.enabled`/`sqld.enabled` to bundle minimal in-cluster instances of both.
 
 ## Releases
 
@@ -95,7 +110,7 @@ Once a release commit lands, `.github/workflows/release-docker.yml` builds the c
 ## Tests & typecheck
 
 ```bash
-bun test          # domain logic (host assignment, auto-reveal, evaluation, …)
+bun test          # domain logic, persistence, and cross-pod Redis relay — needs a reachable Redis (see Prerequisites)
 bunx tsc --noEmit # typecheck across the whole project
 ```
 
@@ -105,8 +120,11 @@ bunx tsc --noEmit # typecheck across the whole project
 src/
 ├── frontend/        # React UI (landing, join, room, card hand, emoji picker, chat)
 └── backend/
-    ├── domain/      # pure domain logic: Room, Participant, deck, evaluation, chat
-    └── ws/          # WebSocket protocol & handler, wires the domain up to transport
+    ├── domain/      # pure domain logic (Room, Participant, deck, evaluation, chat)
+    │                # + db.ts/schema.sql/store.ts: the Turso-backed persistence layer
+    ├── redis/       # Bun.redis pub/sub wrapper (publisher + reconnect-safe subscriber)
+    └── ws/          # WebSocket protocol & handler; roomChannel.ts relays state and
+                      # duel commands across pods over Redis
 ```
 
 ## License

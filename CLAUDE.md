@@ -14,7 +14,7 @@ Default to using Bun instead of Node.js.
 - HTML imports: `src/backend/index.ts` imports `src/frontend/index.html` directly, which pulls in `index.tsx`/`styles.css`; Bun's bundler transpiles and bundles it. Don't add `vite` or a separate frontend build step.
 - Browser-built-in `WebSocket` on the client (`src/frontend/useRoomSocket.ts`). Don't add `ws`.
 - `Bun.file()` to read `CHANGELOG.md` (`src/backend/changelog.ts`). Prefer it over `node:fs` readFile/writeFile.
-- No database. Per ADR-0001 (`docs/adr/0001-in-memory-single-instance-state.md`), all room state lives in memory in a single process — that's a deliberate tradeoff (simplicity over restart-persistence/horizontal scaling), not an oversight. Don't reach for `bun:sqlite`, `Bun.redis`, `Bun.sql`, or any other persistence layer without first flagging that it contradicts this ADR.
+- Room state lives in Turso (libSQL) via `@libsql/client` (`src/backend/domain/db.ts`, `store.ts`), not in-process memory — per ADR-0003 (`docs/adr/0003-turso-and-redis-for-horizontal-scaling.md`), which supersedes ADR-0001 for this subsystem. `TURSO_DATABASE_URL`/`TURSO_AUTH_TOKEN` default to a local file (`file:./dev.db`) so local dev/tests need no external account. Cross-pod WebSocket fan-out goes through `Bun.redis` pub/sub (`src/backend/redis/pubsub.ts`, `src/backend/ws/roomChannel.ts`), reading `REDIS_URL`. Duels are the one exception: per ADR-0003 they stay ephemeral, in-process, never written to Turso — don't "fix" that into a `duels` table. Outside this subsystem, the general ADR-0001 spirit still applies: flag before reaching for another persistence layer.
 
 ## Testing
 

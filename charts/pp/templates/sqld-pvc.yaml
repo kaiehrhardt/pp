@@ -1,0 +1,18 @@
+{{- if .Values.sqld.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "pp.fullname" . }}-sqld
+  labels:
+    {{- include "pp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: sqld
+spec:
+  accessModes:
+    - ReadWriteOnce
+  {{- with .Values.sqld.persistence.storageClassName }}
+  storageClassName: {{ . }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.sqld.persistence.size }}
+{{- end }}

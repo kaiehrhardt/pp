@@ -1,0 +1,60 @@
+# Standalone single-host stack that pulls the published image (ghcr.io/kaiehrhardt/pp)
+# instead of building from source — for deploying to a host that just needs this one
+# file, not a full clone of the repo. Same shape as docker-compose.yml otherwise (app +
+# sqld for Turso + Redis for pub/sub); kept as a separate, self-contained file rather
+# than an overlay on docker-compose.yml, since Compose has no way to *remove* that
+# file's `build:` key from an overlay — this way `docker compose -f
+# docker-compose.prod.yml up` never triggers a local build at all.
+#
+# Usage:
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# Pin a specific released version instead of floating on :latest by overriding the tag:
+#   docker compose -f docker-compose.prod.yml up -d --pull always
+#   (or edit the `image:` line below to e.g. ghcr.io/kaiehrhardt/pp:1.9.0)
+#
+# See ADR-0003 (docs/adr/0003-turso-and-redis-for-horizontal-scaling.md) for why sqld
+# and Redis are here at all.
+
+services:
+  app:
+    image: ghcr.io/kaiehrhardt/pp:latest
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      # sqld's Hrana HTTP API — see the sqld service below. No TURSO_AUTH_TOKEN: this
+      # local sqld instance runs with auth disabled (fine for a single-host box behind
+      # your own network boundary; put a reverse proxy with real auth/TLS in front of
+      # port 3000 for anything internet-facing).
+      TURSO_DATABASE_URL: http://sqld:8080
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      sqld:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  sqld:
+    # Turso's own open-source server — same wire protocol (Hrana over HTTP) as hosted
+    # Turso, so this is real protocol parity, not a stand-in. Its image has no curl/wget
+    # (confirmed by inspecting it) and no documented HTTP health endpoint, so `app`'s
+    # `depends_on` only waits for the container to start, not for a deep health check —
+    # `app`'s `restart: unless-stopped` covers a slow sqld boot by just retrying.
+    image: ghcr.io/tursodatabase/libsql-server:latest
+    volumes:
+      - sqld-data:/var/lib/sqld
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  sqld-data:

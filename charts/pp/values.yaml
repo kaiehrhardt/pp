@@ -1,10 +1,13 @@
 # -- Number of pod replicas.
-# IMPORTANT: room state (participants, votes, chat) lives in each pod's memory only —
-# there is no shared/external store. With more than one replica, participants can be
-# routed to a pod that never created (or already lost) their room, causing "Room not
-# found" errors and inconsistent state. Keep this at 1 unless the app gains a shared
-# backing store; do not enable autoscaling.replicaCount below 1 either.
-replicaCount: 1
+# Room state now lives in Turso (libSQL), with cross-pod WebSocket delivery over Redis
+# pub/sub — see ADR-0003 (docs/adr/0003-turso-and-redis-for-horizontal-scaling.md),
+# which superseded the single-replica constraint from ADR-0001. Requires
+# TURSO_DATABASE_URL/TURSO_AUTH_TOKEN and REDIS_URL, either set via extraEnv below
+# (pointing at a real Turso database/sqld instance and a reachable Redis) or provided by
+# enabling redis.enabled/sqld.enabled below to bundle minimal in-cluster instances of
+# both — without one or the other, the app falls back to a local file and won't share
+# state across replicas at all.
+replicaCount: 2
 
 image:
   repository: ghcr.io/kaiehrhardt/pp
@@ -69,7 +72,8 @@ resources:
     cpu: 100m
     memory: 128Mi
 
-# -- Liveness/readiness probes hit the lightweight version endpoint (no side effects).
+# -- Liveness probe hits the lightweight version endpoint (no external dependencies,
+# so a transient Turso/Redis blip doesn't get the pod killed and restarted).
 livenessProbe:
   httpGet:
     path: /api/version
@@ -77,26 +81,88 @@ livenessProbe:
   initialDelaySeconds: 5
   periodSeconds: 10
 
+# -- Readiness probe hits /api/ready, which pings both Turso and Redis. A transient
+# blip in either marks the pod Not-Ready (stops receiving traffic) without restarting it.
 readinessProbe:
   httpGet:
-    path: /api/version
+    path: /api/ready
     port: http
   initialDelaySeconds: 5
   periodSeconds: 10
 
-# -- Disabled by design: see the replicaCount note above. Do not enable this without
-# also giving the app a shared room store — the HPA target metrics are wired up but
-# scaling out will break room consistency exactly like a manual replica increase.
+# -- Safe to enable now that room state is Turso-backed and cross-pod events flow
+# through Redis (see the replicaCount note above) — scaling out no longer breaks room
+# consistency the way it did under ADR-0001's in-memory model.
 autoscaling:
-  enabled: false
-  minReplicas: 1
+  enabled: true
+  minReplicas: 2
   maxReplicas: 3
   targetCPUUtilizationPercentage: 80
 
-# -- Extra environment variables for the container, e.g.:
-#   - name: NODE_ENV
-#     value: production
+# -- Extra environment variables for the container. Requires TURSO_DATABASE_URL,
+# TURSO_AUTH_TOKEN, and REDIS_URL for a multi-replica deployment (see the replicaCount
+# note above) — supply them via an out-of-band-managed Secret (sealed-secrets,
+# external-secrets, or a manually created `kubectl create secret`), not inline values,
+# so credentials don't end up committed in this file. Example:
+#   - name: TURSO_DATABASE_URL
+#     valueFrom:
+#       secretKeyRef:
+#         name: pp-turso
+#         key: database-url
+#   - name: TURSO_AUTH_TOKEN
+#     valueFrom:
+#       secretKeyRef:
+#         name: pp-turso
+#         key: auth-token
+#   - name: REDIS_URL
+#     valueFrom:
+#       secretKeyRef:
+#         name: pp-redis
+#         key: url
 extraEnv: []
+
+# -- Bundle a minimal in-cluster Redis for cross-pod pub/sub (see ADR-0003), instead of
+# pointing REDIS_URL at an external instance via extraEnv above. When enabled, the app's
+# REDIS_URL is wired up automatically — don't also set it via extraEnv (extraEnv wins if
+# you do, since it's appended last, but that's almost certainly not what you want).
+# A single Pod, no persistence, no auth, no HA — this is a bundled convenience for
+# small/self-hosted deployments, not a substitute for a managed Redis at real scale.
+redis:
+  enabled: false
+  image:
+    repository: redis
+    tag: 7-alpine
+  resources:
+    limits:
+      cpu: 200m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+# -- Bundle Turso's open-source server (sqld) as the app's Turso backend, instead of
+# pointing TURSO_DATABASE_URL at hosted Turso (or an externally-run sqld) via extraEnv
+# above. When enabled, TURSO_DATABASE_URL is wired up automatically (same caveat as
+# redis.enabled above re: extraEnv). Always exactly 1 replica regardless of any
+# replicaCount-like setting — sqld itself isn't distributed, it's the app's single
+# shared backing store (the app's own replicas are what scales). A single Pod backed by
+# a PersistentVolumeClaim; for real backup/HA/multi-region, use hosted Turso instead.
+sqld:
+  enabled: false
+  image:
+    repository: ghcr.io/tursodatabase/libsql-server
+    tag: latest
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  persistence:
+    size: 1Gi
+    # -- Leave empty to use the cluster's default StorageClass.
+    storageClassName: ""
 
 nodeSelector: {}
 tolerations: []

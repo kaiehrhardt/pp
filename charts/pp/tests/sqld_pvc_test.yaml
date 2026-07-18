@@ -1,0 +1,34 @@
+suite: sqld pvc
+templates:
+  - sqld-pvc.yaml
+tests:
+  - it: renders nothing by default
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders a ReadWriteOnce PVC with the default size when enabled
+    set:
+      sqld.enabled: true
+    asserts:
+      - equal:
+          path: spec.accessModes
+          value: ["ReadWriteOnce"]
+      - equal:
+          path: spec.resources.requests.storage
+          value: 1Gi
+      - notExists:
+          path: spec.storageClassName
+
+  - it: honors an overridden size and storage class
+    set:
+      sqld.enabled: true
+      sqld.persistence.size: 10Gi
+      sqld.persistence.storageClassName: fast-ssd
+    asserts:
+      - equal:
+          path: spec.resources.requests.storage
+          value: 10Gi
+      - equal:
+          path: spec.storageClassName
+          value: fast-ssd

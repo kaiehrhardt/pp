@@ -30,5 +30,10 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # IntelliJ based IDEs
 .idea
 
+# local Turso/libSQL file (default TURSO_DATABASE_URL for dev/test/docker-compose)
+dev.db
+dev.db-wal
+dev.db-shm
+
 # Finder (MacOS) folder config
 .DS_Store

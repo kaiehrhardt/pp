@@ -1,0 +1,32 @@
+suite: redis deployment
+templates:
+  - redis-deployment.yaml
+tests:
+  - it: renders nothing by default
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders a single-replica Deployment on port 6379 when enabled
+    set:
+      redis.enabled: true
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 1
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: redis:7-alpine
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 6379
+
+  - it: honors an image override
+    set:
+      redis.enabled: true
+      redis.image.repository: my-registry/redis
+      redis.image.tag: "8.0"
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: my-registry/redis:8.0

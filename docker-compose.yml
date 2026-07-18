@@ -1,0 +1,55 @@
+# Single-host stack: the production image plus its two dependencies (Turso via a local
+# sqld server, Redis for cross-connection pub/sub). This is what a plain `docker
+# compose up` runs — the production-like default, not a dev/hot-reload setup (see
+# docker-compose.dev.yml for that, an explicit opt-in overlay on top of this file).
+#
+# For local *debugging* with hot reload, run:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# See ADR-0003 (docs/adr/0003-turso-and-redis-for-horizontal-scaling.md) for why these
+# two services exist at all.
+
+services:
+  app:
+    build:
+      context: .
+      target: runtime
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      # sqld's Hrana HTTP API — see the sqld service below. No TURSO_AUTH_TOKEN: this
+      # local sqld instance runs with auth disabled (fine for a single-host box behind
+      # your own network boundary; put a reverse proxy with real auth/TLS in front of
+      # port 3000 for anything internet-facing).
+      TURSO_DATABASE_URL: http://sqld:8080
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      sqld:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  sqld:
+    # Turso's own open-source server — same wire protocol (Hrana over HTTP) as hosted
+    # Turso, so this is real protocol parity, not a stand-in. Its image has no curl/wget
+    # (confirmed by inspecting it) and no documented HTTP health endpoint, so `app`'s
+    # `depends_on` only waits for the container to start, not for a deep health check —
+    # `app`'s `restart: unless-stopped` covers a slow sqld boot by just retrying.
+    image: ghcr.io/tursodatabase/libsql-server:latest
+    volumes:
+      - sqld-data:/var/lib/sqld
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  sqld-data:

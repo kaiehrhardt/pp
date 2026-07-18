@@ -45,6 +45,14 @@ spec:
               value: {{ .Values.service.targetPort | quote }}
             - name: NODE_ENV
               value: production
+            {{- if .Values.redis.enabled }}
+            - name: REDIS_URL
+              value: "redis://{{ include "pp.fullname" . }}-redis:6379"
+            {{- end }}
+            {{- if .Values.sqld.enabled }}
+            - name: TURSO_DATABASE_URL
+              value: "http://{{ include "pp.fullname" . }}-sqld:8080"
+            {{- end }}
             {{- with .Values.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}

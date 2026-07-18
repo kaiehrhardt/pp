@@ -1,0 +1,46 @@
+suite: sqld deployment
+templates:
+  - sqld-deployment.yaml
+tests:
+  - it: renders nothing by default
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders a single-replica Deployment on port 8080, using Recreate strategy, when enabled
+    set:
+      sqld.enabled: true
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 1
+      - equal:
+          path: spec.strategy.type
+          value: Recreate
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: ghcr.io/tursodatabase/libsql-server:latest
+      - equal:
+          path: spec.template.spec.containers[0].ports[0].containerPort
+          value: 8080
+
+  - it: mounts the PVC at /var/lib/sqld
+    set:
+      sqld.enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].volumeMounts[0].mountPath
+          value: /var/lib/sqld
+      - equal:
+          path: spec.template.spec.volumes[0].persistentVolumeClaim.claimName
+          value: RELEASE-NAME-pp-sqld
+
+  - it: honors an image override
+    set:
+      sqld.enabled: true
+      sqld.image.repository: my-registry/libsql-server
+      sqld.image.tag: v1.2.3
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: my-registry/libsql-server:v1.2.3

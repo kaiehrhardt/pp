@@ -2,11 +2,18 @@ suite: deployment
 templates:
   - deployment.yaml
 tests:
-  - it: renders exactly one replica by default
+  - it: omits spec.replicas by default since autoscaling is enabled by default
+    asserts:
+      - notExists:
+          path: spec.replicas
+
+  - it: honors replicaCount when autoscaling is disabled
+    set:
+      autoscaling.enabled: false
     asserts:
       - equal:
           path: spec.replicas
-          value: 1
+          value: 2
 
   - it: uses the chart appVersion as the default image tag
     asserts:
@@ -33,14 +40,14 @@ tests:
             name: PORT
             value: "3000"
 
-  - it: points liveness and readiness probes at the version endpoint
+  - it: points the liveness probe at the version endpoint and readiness at the ready endpoint
     asserts:
       - equal:
           path: spec.template.spec.containers[0].livenessProbe.httpGet.path
           value: /api/version
       - equal:
           path: spec.template.spec.containers[0].readinessProbe.httpGet.path
-          value: /api/version
+          value: /api/ready
 
   - it: mounts a writable /tmp when the root filesystem is read-only
     set:
@@ -93,3 +100,43 @@ tests:
           content:
             name: FOO
             value: bar
+
+  - it: omits REDIS_URL/TURSO_DATABASE_URL by default (neither bundled service enabled)
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: REDIS_URL
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: TURSO_DATABASE_URL
+
+  - it: auto-wires REDIS_URL and TURSO_DATABASE_URL at the bundled services when enabled
+    set:
+      redis.enabled: true
+      sqld.enabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: REDIS_URL
+            value: "redis://RELEASE-NAME-pp-redis:6379"
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: TURSO_DATABASE_URL
+            value: "http://RELEASE-NAME-pp-sqld:8080"
+
+  - it: lets extraEnv override the auto-wired REDIS_URL, since it's appended last
+    set:
+      redis.enabled: true
+      extraEnv:
+        - name: REDIS_URL
+          value: redis://external-redis:6379
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].env[-1]
+          value:
+            name: REDIS_URL
+            value: redis://external-redis:6379

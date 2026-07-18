@@ -6,3 +6,6 @@ README.md
 *.md
 !CHANGELOG.md
 .claude
+dev.db
+dev.db-wal
+dev.db-shm

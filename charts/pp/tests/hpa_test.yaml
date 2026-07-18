@@ -2,14 +2,29 @@ suite: hpa
 templates:
   - hpa.yaml
 tests:
-  - it: renders nothing by default, since scaling out breaks in-memory room state
+  - it: renders with the default min/max replicas, since room state is Turso/Redis-backed
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: spec.scaleTargetRef.name
+          value: RELEASE-NAME-pp
+      - equal:
+          path: spec.minReplicas
+          value: 2
+      - equal:
+          path: spec.maxReplicas
+          value: 3
+
+  - it: renders nothing when explicitly disabled
+    set:
+      autoscaling.enabled: false
     asserts:
       - hasDocuments:
           count: 0
 
-  - it: targets the deployment with the configured min/max replicas when enabled
+  - it: targets the deployment with the configured min/max replicas when overridden
     set:
-      autoscaling.enabled: true
       autoscaling.minReplicas: 2
       autoscaling.maxReplicas: 5
     asserts:

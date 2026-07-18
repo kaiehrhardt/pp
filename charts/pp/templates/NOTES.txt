@@ -19,15 +19,14 @@ Planning Poker has been deployed.
   kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
 {{- end }}
 
-{{- if gt (.Values.replicaCount | int) 1 }}
+{{- $multiReplica := or (gt (.Values.replicaCount | int) 1) .Values.autoscaling.enabled }}
+{{- $hasSharedStore := or .Values.redis.enabled .Values.sqld.enabled (gt (len .Values.extraEnv) 0) }}
+{{- if and $multiReplica (not $hasSharedStore) }}
 
-WARNING: replicaCount is set to {{ .Values.replicaCount }}. This app keeps room state
-(participants, votes, chat) in memory, per pod, with no shared backing store. Running
-more than one replica will route participants to inconsistent pods and break rooms.
-Set replicaCount back to 1 unless you know the app has since gained a shared store.
-{{- end }}
-{{- if .Values.autoscaling.enabled }}
-
-WARNING: autoscaling.enabled is true. See the replica warning above — autoscaling has
-the same room-consistency problem as a manual replica increase.
+WARNING: more than one pod is possible (replicaCount={{ .Values.replicaCount }}, autoscaling.enabled={{ .Values.autoscaling.enabled }}),
+but no shared backing store is configured. Room state lives in Turso with cross-pod
+events over Redis (see ADR-0003) — without one, each pod falls back to its own local
+file with no shared state, and participants will be routed to inconsistent pods.
+Set redis.enabled/sqld.enabled to bundle minimal in-cluster instances, or supply
+TURSO_DATABASE_URL/TURSO_AUTH_TOKEN/REDIS_URL via extraEnv pointing at external ones.
 {{- end }}

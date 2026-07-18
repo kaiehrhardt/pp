@@ -1,0 +1,43 @@
+{{- if .Values.sqld.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "pp.fullname" . }}-sqld
+  labels:
+    {{- include "pp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: sqld
+spec:
+  # Always exactly 1: sqld itself isn't distributed, it's the app's single shared
+  # backing store (see values.yaml's sqld.enabled comment). RollingUpdate would try to
+  # bring up a second pod that can't mount the same ReadWriteOnce PVC — Recreate avoids
+  # that.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "pp.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: sqld
+  template:
+    metadata:
+      labels:
+        {{- include "pp.labels" . | nindent 8 }}
+        app.kubernetes.io/component: sqld
+    spec:
+      containers:
+        - name: sqld
+          image: "{{ .Values.sqld.image.repository }}:{{ .Values.sqld.image.tag }}"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/sqld
+          resources:
+            {{- toYaml .Values.sqld.resources | nindent 12 }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "pp.fullname" . }}-sqld
+{{- end }}

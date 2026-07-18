@@ -1,0 +1,25 @@
+suite: sqld service
+templates:
+  - sqld-service.yaml
+tests:
+  - it: renders nothing by default
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders a ClusterIP service on port 8080 when enabled
+    set:
+      sqld.enabled: true
+    asserts:
+      - equal:
+          path: spec.type
+          value: ClusterIP
+      - equal:
+          path: spec.ports[0].port
+          value: 8080
+      - equal:
+          path: spec.selector
+          value:
+            app.kubernetes.io/name: pp
+            app.kubernetes.io/instance: RELEASE-NAME
+            app.kubernetes.io/component: sqld

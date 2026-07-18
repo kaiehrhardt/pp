@@ -1,0 +1,24 @@
+# Explicit dev/debugging overlay — NOT auto-loaded by a plain `docker compose up`
+# (unlike docker-compose.override.yml, which Compose merges in automatically; this file
+# is named to require an explicit -f so a single-host operator running the base file
+# never accidentally gets a hot-reload dev build instead of the production image).
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# Rebuilds `app` from the Dockerfile's `install` stage (has node_modules, not yet the
+# baked-in `src`), then bind-mounts the whole repo over it for live source + hot reload.
+
+services:
+  app:
+    build:
+      target: install
+    environment:
+      NODE_ENV: development
+    command: bun run dev
+    volumes:
+      - .:/app
+      # Anonymous volume "wins" over the bind mount above for this one path, so the
+      # image's own installed node_modules aren't shadowed by the (absent, on a fresh
+      # checkout) host node_modules — the standard bind-mount-a-whole-app-dir trick.
+      - /app/node_modules

@@ -12,7 +12,10 @@
     "test:coverage": "bun test --coverage",
     "release": "semantic-release",
     "docker:build": "docker build -t planning-poker .",
-    "docker:run": "docker run --rm -p 3000:3000 planning-poker"
+    "docker:run": "docker run --rm -p 3000:3000 planning-poker",
+    "compose": "docker compose up --build",
+    "compose:dev": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
+    "compose:prod": "docker compose -f docker-compose.prod.yml up"
   },
   "devDependencies": {
     "@semantic-release/changelog": "6.0.3",
@@ -31,6 +34,7 @@
     "typescript": "7.0.2"
   },
   "dependencies": {
+    "@libsql/client": "^0.17.4",
     "i18next": "26.3.6",
     "nanoid": "6.0.0",
     "react": "19.2.7",
