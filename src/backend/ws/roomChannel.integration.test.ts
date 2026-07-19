@@ -139,6 +139,10 @@ describe("cross-pod relay over Redis", () => {
     expect(result.outcome).toBe("lose");
     expect(result.matchOver).toBe(true);
 
+    const stats = await podA.store.getSessionEvaluation(room.id);
+    expect(stats?.duelsCompleted).toBe(1);
+    expect(stats?.trophiesWon).toBe(1);
+
     aliceConn.ws.close();
     bobConn.ws.close();
   });

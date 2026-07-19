@@ -106,6 +106,14 @@ describe("message", () => {
         handlers.message(fakeSocket(room.id, alice.id), JSON.stringify({ type: "reaction", to: bob.id, emoji: "👍" })),
       ).resolves.toBeUndefined();
     });
+
+    test("counts toward the room's Session Evaluation reactionsThrown tally", async () => {
+      const room = await store.create();
+      const { alice, bob } = await addTwo(room.id);
+      await handlers.message(fakeSocket(room.id, alice.id), JSON.stringify({ type: "reaction", to: bob.id, emoji: "👍" }));
+      await handlers.message(fakeSocket(room.id, bob.id), JSON.stringify({ type: "reaction", to: alice.id, emoji: "🎉" }));
+      expect((await store.getSessionEvaluation(room.id))?.reactionsThrown).toBe(2);
+    });
   });
 
   describe("kick", () => {

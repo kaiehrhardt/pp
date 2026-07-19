@@ -98,10 +98,13 @@
   "sessionEvaluation": {
     "title": "Session stats",
     "close": "Close",
-    "empty": "No rounds revealed yet.",
+    "empty": "No session activity yet.",
     "rounds": "Rounds",
     "average": "Average",
     "min": "Min",
-    "max": "Max"
+    "max": "Max",
+    "reactionsThrown": "Smileys thrown",
+    "duelsCompleted": "Rock-paper-scissors played",
+    "trophiesWon": "Trophies won"
   }
 }

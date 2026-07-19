@@ -307,6 +307,24 @@ export class RoomStore {
     return this.get(roomId);
   }
 
+  // Reactions/Duels stay ephemeral in-process (ADR-0003) — this only bumps a room-level
+  // tally for the Session Evaluation widget, not the Reaction/Duel itself.
+  async incrementReactionsThrown(roomId: string): Promise<void> {
+    await this.db.execute({
+      sql: "UPDATE rooms SET reactions_thrown = reactions_thrown + 1, version = version + 1 WHERE id = ?",
+      args: [roomId],
+    });
+  }
+
+  // Only for a Duel that actually finished (someone reached best-of-3), never a
+  // cancelled one — call alongside awardTrophy, at the same call site.
+  async incrementDuelsCompleted(roomId: string): Promise<void> {
+    await this.db.execute({
+      sql: "UPDATE rooms SET duels_completed = duels_completed + 1, version = version + 1 WHERE id = ?",
+      args: [roomId],
+    });
+  }
+
   async reconnectParticipant(roomId: string, participantId: string): Promise<Room | undefined> {
     await this.db.batch(
       [
@@ -403,12 +421,40 @@ export class RoomStore {
 
   async getSessionEvaluation(roomId: string): Promise<SessionEvaluation | null> {
     const result = await this.db.execute({
-      sql: "SELECT COUNT(*) AS round_count, AVG(average) AS avg, MIN(average) AS min, MAX(average) AS max FROM round_evaluations WHERE room_id = ?",
-      args: [roomId],
+      sql: `SELECT
+              (SELECT COUNT(*) FROM round_evaluations WHERE room_id = ?) AS round_count,
+              (SELECT AVG(average) FROM round_evaluations WHERE room_id = ?) AS avg,
+              (SELECT MIN(average) FROM round_evaluations WHERE room_id = ?) AS min,
+              (SELECT MAX(average) FROM round_evaluations WHERE room_id = ?) AS max,
+              (SELECT reactions_thrown FROM rooms WHERE id = ?) AS reactions_thrown,
+              (SELECT duels_completed FROM rooms WHERE id = ?) AS duels_completed,
+              (SELECT COALESCE(SUM(trophy_count), 0) FROM participants WHERE room_id = ?) AS trophies_won`,
+      args: [roomId, roomId, roomId, roomId, roomId, roomId, roomId],
     });
-    const row = result.rows[0] as unknown as { round_count: number; avg: number | null; min: number | null; max: number | null } | undefined;
-    if (!row || row.round_count === 0 || row.avg === null) return null;
-    return { roundCount: row.round_count, average: row.avg, min: row.min!, max: row.max! };
+    const row = result.rows[0] as unknown as
+      | {
+          round_count: number;
+          avg: number | null;
+          min: number | null;
+          max: number | null;
+          reactions_thrown: number | null;
+          duels_completed: number | null;
+          trophies_won: number;
+        }
+      | undefined;
+    if (!row) return null;
+    const reactionsThrown = row.reactions_thrown ?? 0;
+    const duelsCompleted = row.duels_completed ?? 0;
+    if (row.round_count === 0 && reactionsThrown === 0 && duelsCompleted === 0 && row.trophies_won === 0) return null;
+    return {
+      roundCount: row.round_count,
+      average: row.avg,
+      min: row.min,
+      max: row.max,
+      reactionsThrown,
+      duelsCompleted,
+      trophiesWon: row.trophies_won,
+    };
   }
 
   async cleanupExpiredRooms(now: number = Date.now()): Promise<void> {

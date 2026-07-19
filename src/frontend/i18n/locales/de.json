@@ -98,10 +98,13 @@
   "sessionEvaluation": {
     "title": "Session-Auswertung",
     "close": "Schließen",
-    "empty": "Noch keine Runde aufgedeckt.",
+    "empty": "Noch keine Session-Aktivität.",
     "rounds": "Runden",
     "average": "Durchschnitt",
     "min": "Min",
-    "max": "Max"
+    "max": "Max",
+    "reactionsThrown": "Geworfene Smileys",
+    "duelsCompleted": "Gespielte Schnick-Schnack-Schnuck",
+    "trophiesWon": "Gewonnene Pokale"
   }
 }

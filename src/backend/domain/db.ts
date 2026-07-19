@@ -23,7 +23,21 @@ export function createDb(
   return createClient({ url, authToken, readYourWrites: true, timeout: 2000 });
 }
 
+// `CREATE TABLE IF NOT EXISTS` (schema.sql) only helps brand-new tables — it's a
+// no-op against a `rooms` table that already exists from before a column was added,
+// so an already-deployed database needs that column bolted on separately. Checked via
+// PRAGMA table_info rather than just trying the ALTER TABLE and swallowing "duplicate
+// column", since migrate() runs on every boot and duplicate-column is not a safe error
+// to blanket-ignore (it'd also hide a genuine typo in `definition`).
+async function ensureColumn(db: Client, table: string, column: string, definition: string): Promise<void> {
+  const info = await db.execute(`PRAGMA table_info(${table})`);
+  const exists = info.rows.some((row) => (row as unknown as { name: string }).name === column);
+  if (!exists) await db.execute(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+}
+
 export async function migrate(db: Client): Promise<void> {
   const schema = await Bun.file(SCHEMA_PATH).text();
   await db.executeMultiple(schema);
+  await ensureColumn(db, "rooms", "reactions_thrown", "INTEGER NOT NULL DEFAULT 0");
+  await ensureColumn(db, "rooms", "duels_completed", "INTEGER NOT NULL DEFAULT 0");
 }

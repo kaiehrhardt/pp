@@ -194,6 +194,7 @@ export function createRoomChannel(store: RoomStore) {
           const matchWinnerId = duelDomain.matchWinnerId(duel);
           duelDomain.removeDuel(roomShapeForDuels(roomId), duel.id);
           if (matchWinnerId) {
+            await store.incrementDuelsCompleted(roomId);
             const updated = await store.awardTrophy(roomId, matchWinnerId);
             if (updated) await publishRoomState(updated);
           }

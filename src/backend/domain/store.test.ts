@@ -204,7 +204,15 @@ describe("reveal", () => {
     await store.reveal(room.id);
 
     let stats = await store.getSessionEvaluation(room.id);
-    expect(stats).toEqual({ roundCount: 1, average: 6.5, min: 6.5, max: 6.5 });
+    expect(stats).toEqual({
+      roundCount: 1,
+      average: 6.5,
+      min: 6.5,
+      max: 6.5,
+      reactionsThrown: 0,
+      duelsCompleted: 0,
+      trophiesWon: 0,
+    });
 
     // Round 2: average 2
     await store.startNewRound(room.id);
@@ -213,7 +221,51 @@ describe("reveal", () => {
     await store.reveal(room.id);
 
     stats = await store.getSessionEvaluation(room.id);
-    expect(stats).toEqual({ roundCount: 2, average: 4.25, min: 2, max: 6.5 });
+    expect(stats).toEqual({
+      roundCount: 2,
+      average: 4.25,
+      min: 2,
+      max: 6.5,
+      reactionsThrown: 0,
+      duelsCompleted: 0,
+      trophiesWon: 0,
+    });
+  });
+
+  test("getSessionEvaluation counts reactions/duels/trophies even before any round is revealed", async () => {
+    const room = await store.create();
+    const a = await store.addParticipant(room.id, "Ada", false, "🙂");
+    if (a === "full" || a === "not_found") throw new Error("unexpected");
+
+    await store.incrementReactionsThrown(room.id);
+    await store.incrementReactionsThrown(room.id);
+    await store.incrementDuelsCompleted(room.id);
+    await store.awardTrophy(room.id, a.participant.id);
+
+    const stats = await store.getSessionEvaluation(room.id);
+    expect(stats).toEqual({
+      roundCount: 0,
+      average: null,
+      min: null,
+      max: null,
+      reactionsThrown: 2,
+      duelsCompleted: 1,
+      trophiesWon: 1,
+    });
+  });
+
+  test("getSessionEvaluation sums trophy_count across every participant", async () => {
+    const room = await store.create();
+    const a = await store.addParticipant(room.id, "Ada", false, "🙂");
+    const b = await store.addParticipant(room.id, "Bea", false, "🙂");
+    if (a === "full" || a === "not_found" || b === "full" || b === "not_found") throw new Error("unexpected");
+
+    await store.awardTrophy(room.id, a.participant.id);
+    await store.awardTrophy(room.id, b.participant.id);
+    await store.awardTrophy(room.id, b.participant.id);
+
+    const stats = await store.getSessionEvaluation(room.id);
+    expect(stats?.trophiesWon).toBe(3);
   });
 });
 

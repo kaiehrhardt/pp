@@ -74,6 +74,8 @@ export function createWebSocketHandlers(store: RoomStore, roomChannel: RoomChann
         case "reaction": {
           if (!room.participants.has(message.to)) return;
           await roomChannel.publishFanout(room.id, { type: "reaction", from: participant.id, to: message.to, emoji: message.emoji });
+          await store.incrementReactionsThrown(room.id);
+          await roomChannel.publishRoomState(room);
           return;
         }
         case "kick": {

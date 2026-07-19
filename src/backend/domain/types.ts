@@ -55,12 +55,17 @@ export interface Evaluation {
   recommendedCard: NumericCard;
 }
 
-// A rollup of every round's Evaluation.average across the Room's whole lifetime — null
-// once no round has produced a numeric average yet (e.g. everyone voted coffee/unknown,
-// or no round has been revealed at all).
+// A rollup of session-wide activity across the Room's whole lifetime — null only once
+// truly nothing has happened yet (no round revealed, no Reaction thrown, no Duel
+// completed, no Trophy won). average/min/max are null exactly when roundCount is 0
+// (e.g. no round revealed yet, or every vote so far was coffee/unknown); they're
+// never null once roundCount is positive.
 export interface SessionEvaluation {
   roundCount: number;
-  average: number;
-  min: number;
-  max: number;
+  average: number | null;
+  min: number | null;
+  max: number | null;
+  reactionsThrown: number;
+  duelsCompleted: number;
+  trophiesWon: number;
 }

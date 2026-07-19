@@ -1,10 +1,12 @@
 CREATE TABLE IF NOT EXISTS rooms (
-  id          TEXT PRIMARY KEY,
-  host_id     TEXT,
-  phase       TEXT NOT NULL DEFAULT 'voting' CHECK (phase IN ('voting', 'revealed')),
-  created_at  INTEGER NOT NULL,
-  empty_since INTEGER,
-  version     INTEGER NOT NULL DEFAULT 0
+  id                TEXT PRIMARY KEY,
+  host_id           TEXT,
+  phase             TEXT NOT NULL DEFAULT 'voting' CHECK (phase IN ('voting', 'revealed')),
+  created_at        INTEGER NOT NULL,
+  empty_since       INTEGER,
+  reactions_thrown  INTEGER NOT NULL DEFAULT 0,
+  duels_completed   INTEGER NOT NULL DEFAULT 0,
+  version           INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE INDEX IF NOT EXISTS idx_rooms_empty_since ON rooms(empty_since) WHERE empty_since IS NOT NULL;
