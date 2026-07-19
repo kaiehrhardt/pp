@@ -43,8 +43,10 @@ export function ParticipantTile({
   const [pickerOpen, setPickerOpen] = useState(false);
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false);
 
-  const showVoteBadge = !participant.isSpectator && (revealed || participant.hasVoted);
+  const hasVoteBadge = !participant.isSpectator;
+  const showVoteBadge = hasVoteBadge && (revealed || participant.hasVoted);
   const voteValue = participant.vote !== null ? cardLabel(participant.vote) : "–";
+  const pickerIsOpen = pickerOpen || avatarPickerOpen;
 
   function handleKick() {
     if (confirm(t("participantTile.confirmKick", { name: participant.name }))) onKick();
@@ -52,7 +54,7 @@ export function ParticipantTile({
 
   return (
     <div
-      className={`participant-tile${isSelf ? " participant-tile-self" : ""}${!participant.connected ? " participant-tile-disconnected" : ""}`}
+      className={`participant-tile${isSelf ? " participant-tile-self" : ""}${!participant.connected ? " participant-tile-disconnected" : ""}${pickerIsOpen ? " participant-tile-active" : ""}`}
       style={{ "--seat-color": participant.color } as CSSProperties}
     >
       <button
@@ -106,9 +108,9 @@ export function ParticipantTile({
             {t("participantTile.guessWinnerBadge")}
           </span>
         )}
-        {showVoteBadge && (
+        {hasVoteBadge && (
           <span
-            className={`participant-vote${revealed ? " participant-vote-revealed" : ""}`}
+            className={`participant-vote${revealed ? " participant-vote-revealed" : ""}${showVoteBadge ? "" : " participant-vote-empty"}`}
             style={{ "--flip-delay": `${flipDelay}ms` } as CSSProperties}
           >
             <span className="participant-vote-inner">

@@ -1,5 +1,5 @@
 import * as domain from "../domain/room";
-import type { Card, ChatMessage, Evaluation, Room, RpsMove } from "../domain/types";
+import type { Card, ChatMessage, Evaluation, Room, RpsMove, SessionEvaluation } from "../domain/types";
 
 export type ClientMessage =
   | { type: "vote"; card: Card }
@@ -37,6 +37,7 @@ export interface RoomStateDTO {
   evaluation: Evaluation | null;
   unanimousVote: boolean;
   guessWinnerIds: string[];
+  sessionEvaluation: SessionEvaluation | null;
 }
 
 export type ServerMessage =
@@ -66,7 +67,12 @@ export type ServerMessage =
       matchOver: boolean;
     };
 
-export function toRoomStateDTO(room: Room, evaluation: Evaluation | null, viewerId: string): RoomStateDTO {
+export function toRoomStateDTO(
+  room: Room,
+  evaluation: Evaluation | null,
+  viewerId: string,
+  sessionEvaluation: SessionEvaluation | null,
+): RoomStateDTO {
   const revealed = room.phase === "revealed";
   return {
     roomId: room.id,
@@ -75,6 +81,7 @@ export function toRoomStateDTO(room: Room, evaluation: Evaluation | null, viewer
     evaluation: revealed ? evaluation : null,
     unanimousVote: revealed && domain.isUnanimousVote(room),
     guessWinnerIds: revealed ? domain.computeGuessWinners(room, evaluation) : [],
+    sessionEvaluation,
     participants: [...room.participants.values()].map((p) => ({
       id: p.id,
       name: p.name,

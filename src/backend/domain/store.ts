@@ -1,7 +1,9 @@
 import { LibsqlError, type Client, type Transaction } from "@libsql/client";
+import { nanoid } from "nanoid";
 import {
   addChatMessage as addChatMessagePure,
   addParticipant as addParticipantPure,
+  computeEvaluation,
   createRoom,
   disconnectParticipant as disconnectParticipantPure,
   GRACE_PERIOD_MS,
@@ -9,7 +11,7 @@ import {
   removeParticipant as removeParticipantPure,
   reveal as revealPure,
 } from "./room";
-import type { Card, ChatMessage, NumericCard, Participant, Room, RoomPhase } from "./types";
+import type { Card, ChatMessage, Evaluation, NumericCard, Participant, Room, RoomPhase, SessionEvaluation } from "./types";
 
 // Kept small: @libsql/client's local-file Transaction.close() leaks the underlying
 // native connection on every failed attempt (see db.ts), so retries themselves are
@@ -375,10 +377,38 @@ export class RoomStore {
   }
 
   async reveal(roomId: string): Promise<Room | undefined> {
-    const outcome = await withRoom(this.db, roomId, (room) => {
-      revealPure(room);
-    });
+    // Captured by the mutate callback below, then recorded into round_evaluations
+    // (within the same transaction) if the round actually produced a numeric average —
+    // e.g. everyone voting coffee/unknown leaves this null, and nothing is recorded.
+    let evaluation: Evaluation | null = null;
+    const outcome = await withRoom(
+      this.db,
+      roomId,
+      (room) => {
+        revealPure(room);
+        evaluation = computeEvaluation(room);
+      },
+      {
+        beforePersist: async (tx) => {
+          if (!evaluation) return;
+          await tx.execute({
+            sql: "INSERT INTO round_evaluations (id, room_id, average, recommended_card, revealed_at) VALUES (?, ?, ?, ?, ?)",
+            args: [nanoid(10), roomId, evaluation.average, String(evaluation.recommendedCard), Date.now()],
+          });
+        },
+      },
+    );
     return outcome?.room;
+  }
+
+  async getSessionEvaluation(roomId: string): Promise<SessionEvaluation | null> {
+    const result = await this.db.execute({
+      sql: "SELECT COUNT(*) AS round_count, AVG(average) AS avg, MIN(average) AS min, MAX(average) AS max FROM round_evaluations WHERE room_id = ?",
+      args: [roomId],
+    });
+    const row = result.rows[0] as unknown as { round_count: number; avg: number | null; min: number | null; max: number | null } | undefined;
+    if (!row || row.round_count === 0 || row.avg === null) return null;
+    return { roundCount: row.round_count, average: row.avg, min: row.min!, max: row.max! };
   }
 
   async cleanupExpiredRooms(now: number = Date.now()): Promise<void> {

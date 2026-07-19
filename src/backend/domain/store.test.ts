@@ -179,6 +179,42 @@ describe("reveal", () => {
     expect(final!.participants.get(a.participant.id)!.trophyCount).toBe(1);
     expect(final!.participants.get(b.participant.id)!.trophyCount).toBe(0);
   });
+
+  test("getSessionEvaluation is null until a round with a numeric average has been revealed", async () => {
+    const room = await store.create();
+    expect(await store.getSessionEvaluation(room.id)).toBeNull();
+
+    const a = await store.addParticipant(room.id, "Ada", false, "🙂");
+    if (a === "full" || a === "not_found") throw new Error("unexpected");
+    await store.castVote(room.id, a.participant.id, "coffee"); // no numeric votes at all
+    await store.reveal(room.id);
+
+    expect(await store.getSessionEvaluation(room.id)).toBeNull();
+  });
+
+  test("getSessionEvaluation aggregates round averages across the whole session", async () => {
+    const room = await store.create();
+    const a = await store.addParticipant(room.id, "Ada", false, "🙂");
+    const b = await store.addParticipant(room.id, "Bea", false, "🙂");
+    if (a === "full" || a === "not_found" || b === "full" || b === "not_found") throw new Error("unexpected");
+
+    // Round 1: average 6.5
+    await store.castVote(room.id, a.participant.id, 5);
+    await store.castVote(room.id, b.participant.id, 8);
+    await store.reveal(room.id);
+
+    let stats = await store.getSessionEvaluation(room.id);
+    expect(stats).toEqual({ roundCount: 1, average: 6.5, min: 6.5, max: 6.5 });
+
+    // Round 2: average 2
+    await store.startNewRound(room.id);
+    await store.castVote(room.id, a.participant.id, 1);
+    await store.castVote(room.id, b.participant.id, 3);
+    await store.reveal(room.id);
+
+    stats = await store.getSessionEvaluation(room.id);
+    expect(stats).toEqual({ roundCount: 2, average: 4.25, min: 2, max: 6.5 });
+  });
 });
 
 describe("chat", () => {

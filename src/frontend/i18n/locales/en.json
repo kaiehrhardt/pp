@@ -94,5 +94,14 @@
     "title": "Leaderboard",
     "close": "Close",
     "empty": "No trophies won yet."
+  },
+  "sessionEvaluation": {
+    "title": "Session stats",
+    "close": "Close",
+    "empty": "No rounds revealed yet.",
+    "rounds": "Rounds",
+    "average": "Average",
+    "min": "Min",
+    "max": "Max"
   }
 }

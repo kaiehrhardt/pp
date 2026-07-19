@@ -11,6 +11,7 @@ import { JoinForm } from "./JoinForm";
 import { Leaderboard } from "./Leaderboard";
 import { ParticipantTile } from "./ParticipantTile";
 import { RpsDuelOverlay } from "./RpsDuelOverlay";
+import { SessionEvaluation } from "./SessionEvaluation";
 import type { SeatPosition } from "./ThrownEmoji";
 import { ThrownEmoji } from "./ThrownEmoji";
 
@@ -123,13 +124,24 @@ export function Room({ roomId }: RoomProps) {
           <span className="brand-logo">🃏</span>
           <h1>Planning Poker</h1>
         </div>
-        <button type="button" className="button-secondary" onClick={copyLink}>
-          {copied ? t("room.copyLinkCopied") : t("room.copyLinkDefault")}
-        </button>
+        <div className="room-header-actions">
+          <button
+            type="button"
+            className={`button-secondary spectator-toggle${self?.isSpectator ? " spectator-toggle-active" : ""}`}
+            aria-pressed={self?.isSpectator ?? false}
+            onClick={toggleSpectator}
+          >
+            {t("room.spectatorToggleLabel")}
+          </button>
+          <button type="button" className="button-secondary" onClick={copyLink}>
+            {copied ? t("room.copyLinkCopied") : t("room.copyLinkDefault")}
+          </button>
+        </div>
       </header>
 
       <div className="table-area">
         <Leaderboard participants={roomState.participants} />
+        <SessionEvaluation stats={roomState.sessionEvaluation} />
 
         <div className="table">
           <div className="table-surface">
@@ -187,10 +199,6 @@ export function Room({ roomId }: RoomProps) {
       </div>
 
       <footer className="room-footer">
-        <label className="spectator-toggle">
-          <input type="checkbox" checked={self?.isSpectator ?? false} onChange={toggleSpectator} />
-          {t("room.spectatorToggleLabel")}
-        </label>
         <CardHand
           selected={self?.vote ?? null}
           disabled={Boolean(self?.isSpectator) || roomState.phase !== "voting"}

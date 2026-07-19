@@ -39,3 +39,13 @@ CREATE TABLE IF NOT EXISTS chat_messages (
 );
 
 CREATE INDEX IF NOT EXISTS idx_chat_room_sent ON chat_messages(room_id, sent_at);
+
+CREATE TABLE IF NOT EXISTS round_evaluations (
+  id                TEXT PRIMARY KEY,
+  room_id           TEXT NOT NULL REFERENCES rooms(id) ON DELETE CASCADE,
+  average           REAL NOT NULL,
+  recommended_card  TEXT NOT NULL,
+  revealed_at       INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_round_evaluations_room ON round_evaluations(room_id);

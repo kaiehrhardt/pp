@@ -94,5 +94,14 @@
     "title": "Bestenliste",
     "close": "Schließen",
     "empty": "Noch keine Pokale gewonnen."
+  },
+  "sessionEvaluation": {
+    "title": "Session-Auswertung",
+    "close": "Schließen",
+    "empty": "Noch keine Runde aufgedeckt.",
+    "rounds": "Runden",
+    "average": "Durchschnitt",
+    "min": "Min",
+    "max": "Max"
   }
 }

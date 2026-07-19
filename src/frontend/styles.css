@@ -237,8 +237,10 @@ button:disabled {
 
 .room-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  gap: 0.6rem;
   padding: 1.1rem 9.5rem 1.1rem 1.75rem;
   background: color-mix(in srgb, var(--card-bg) 70%, transparent);
   backdrop-filter: blur(8px);
@@ -265,6 +267,13 @@ button:disabled {
 
 .table-area {
   position: relative;
+  /* Explicit (not auto) so this whole flex item — including an open reaction picker
+     nested deep inside it — reliably stacks as a unit against its .room siblings
+     below (.spectator-toggle, .room-footer). Empirically, giving a *descendant* like
+     the picker's own tile a high z-index isn't enough on its own here; it's this
+     top-level flex item's own z-index that Chromium actually uses for that
+     cross-branch comparison. */
+  z-index: 2;
   flex: 1;
   min-height: 0;
   display: flex;
@@ -344,6 +353,7 @@ button:disabled {
 
 .participant-tile {
   position: relative;
+  z-index: 1;
   border-radius: var(--radius-md);
   border: 1px solid var(--card-border);
   background: var(--card-bg);
@@ -351,6 +361,13 @@ button:disabled {
   min-width: 4.875em;
   box-shadow: var(--shadow-md);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Seats are laid out in a circle (see Room.tsx) and can sit close together — a tile
+   whose popup (emoji picker) is open must always paint above every neighboring tile,
+   including ones that physically overlap it, regardless of DOM order. */
+.participant-tile-active {
+  z-index: 30;
 }
 
 .participant-tile:hover {
@@ -622,6 +639,14 @@ button:disabled {
   perspective: 18.75em;
 }
 
+/* Reserves the vote badge's layout space from the moment a participant could vote,
+   not just once they have — otherwise a tile grows taller the instant someone votes
+   and can start overlapping (and stealing clicks from) its neighbor on the round
+   table. visibility (not display) keeps the space without drawing anything. */
+.participant-vote-empty {
+  visibility: hidden;
+}
+
 .participant-vote-inner {
   display: block;
   position: relative;
@@ -796,18 +821,34 @@ button:disabled {
   padding: 1.5rem 1.5rem 2rem;
 }
 
-.spectator-toggle {
+.room-header-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.45rem;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--muted);
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  padding: 0.4rem 0.9rem;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+/* Lives in the sticky header now (z-index:20, well above .table-area's z-index:2 —
+   see .table-area's comment), so it naturally stays visible/clickable above an open
+   reaction picker without needing any special stacking treatment of its own. A toggle
+   button (not a checkbox) styled on top of .button-secondary, matching "Copy link" —
+   .spectator-toggle-active is the pressed/on state, same gradient language as a
+   selected card in the deck. */
+.spectator-toggle {
   border-radius: 999px;
-  box-shadow: var(--shadow-sm);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.spectator-toggle-active {
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  border-color: var(--accent);
+  color: white;
+}
+
+.spectator-toggle-active:hover {
+  border-color: var(--accent);
 }
 
 .card-hand {
@@ -1409,4 +1450,93 @@ button:disabled {
   font-size: 0.8rem;
   font-weight: 700;
   color: #fbbf24;
+}
+
+/* Mirrors .leaderboard-widget, top-left instead of top-right. */
+.session-evaluation-widget {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.session-evaluation-toggle {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--fg);
+  font-size: 1.2rem;
+  box-shadow: var(--shadow-lg);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.session-evaluation-toggle:hover {
+  transform: translateY(-2px) scale(1.05);
+  border-color: var(--accent);
+}
+
+.session-evaluation-panel {
+  width: min(240px, calc(100vw - 2rem));
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: rise-in 0.15s ease-out;
+}
+
+.session-evaluation-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid var(--card-border);
+  flex-shrink: 0;
+}
+
+.session-evaluation-panel-header h2 {
+  font-size: 1rem;
+}
+
+.session-evaluation-empty {
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 1rem;
+  margin: 0;
+}
+
+.session-evaluation-list {
+  padding: 0.6rem 1.1rem 0.9rem;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.session-evaluation-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.session-evaluation-row dt {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.session-evaluation-row dd {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
 }

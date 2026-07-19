@@ -54,3 +54,13 @@ export interface Evaluation {
   average: number;
   recommendedCard: NumericCard;
 }
+
+// A rollup of every round's Evaluation.average across the Room's whole lifetime — null
+// once no round has produced a numeric average yet (e.g. everyone voted coffee/unknown,
+// or no round has been revealed at all).
+export interface SessionEvaluation {
+  roundCount: number;
+  average: number;
+  min: number;
+  max: number;
+}

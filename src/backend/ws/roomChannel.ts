@@ -116,12 +116,18 @@ export function createRoomChannel(store: RoomStore) {
     for (const conn of conns) conn.close();
   }
 
-  function deliverRoomState(roomId: string, room: Room): void {
+  async function deliverRoomState(roomId: string, room: Room): Promise<void> {
     const localParticipants = localSockets.get(roomId);
     if (!localParticipants) return;
     const evaluation = computeEvaluation(room);
+    // Only actually changes on reveal, but fetched on every delivery for simplicity —
+    // this app is human-paced, not high-throughput, so the extra read is a non-issue.
+    const sessionEvaluation = await store.getSessionEvaluation(roomId);
     for (const participantId of localParticipants.keys()) {
-      sendLocal(roomId, participantId, { type: "roomState", room: toRoomStateDTO(room, evaluation, participantId) });
+      sendLocal(roomId, participantId, {
+        type: "roomState",
+        room: toRoomStateDTO(room, evaluation, participantId, sessionEvaluation),
+      });
     }
   }
 
@@ -213,7 +219,7 @@ export function createRoomChannel(store: RoomStore) {
 
     switch (envelope.kind) {
       case "roomSnapshot":
-        deliverRoomState(roomId, deserializeRoom(envelope.room));
+        await deliverRoomState(roomId, deserializeRoom(envelope.room));
         return;
       case "fanout": {
         const localParticipants = localSockets.get(roomId);
@@ -235,7 +241,7 @@ export function createRoomChannel(store: RoomStore) {
 
   async function reconcileRoom(roomId: string): Promise<void> {
     const room = await store.get(roomId);
-    if (room) deliverRoomState(roomId, room);
+    if (room) await deliverRoomState(roomId, room);
   }
 
   async function onSubscriberReconnect(): Promise<void> {

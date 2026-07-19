@@ -63,3 +63,7 @@ _Avoid_: Emoji burst, Broadcast (a Reaction is always targeted at one participan
 **Kick**:
 A host-only, immediate, and permanent removal of a participant from the Room — deliberately bypassing the disconnect/reconnect grace period the rest of this domain relies on. The kicked participant's stored token is wiped client-side, so rejoining via the room link creates a brand-new Participant with no link to the old one: Trophy count, Avatar, and Seat color are all lost, not restored. Cancels any Duel the kicked participant was in. If they were the last voting participant yet to vote, their removal can itself trigger a Reveal, exactly as if they had voted.
 _Avoid_: Ban, Remove (Kick is the term already used in the UI and protocol)
+
+**Session Evaluation**:
+A rollup of every round's Evaluation.average across the Room's entire lifetime — round count, average, min, and max. Distinct from Evaluation itself (which is one round's outcome); this is the average *of* those averages, not a recalculation over every individual Vote ever cast, so a round with two Participants counts the same as a round with ten. A round only contributes if it produced a numeric Evaluation at all — everyone voting ☕/? leaves nothing to record. Shown in a collapsible widget, mirroring the Trophy leaderboard's shape but for round outcomes instead of mini-game wins.
+_Avoid_: Statistics, History (Session Evaluation is the term already used in the codebase; "history" would wrongly imply a per-round log is kept, when only the aggregate is)
