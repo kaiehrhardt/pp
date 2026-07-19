@@ -249,6 +249,32 @@ describe("cleanupExpiredRooms", () => {
   });
 });
 
+describe("startCleanup/stopCleanup", () => {
+  test("periodically sweeps expired rooms until stopped", async () => {
+    const expired = await store.create();
+    const joined = await store.addParticipant(expired.id, "Ada", false, "🙂");
+    if (joined === "full" || joined === "not_found") throw new Error("unexpected");
+    await store.disconnectParticipant(expired.id, joined.participant.id);
+
+    // A negative "now" is unreachable from real callers, but lets this test force an
+    // immediate sweep to actually delete something without waiting out GRACE_PERIOD_MS.
+    const originalCleanup = store.cleanupExpiredRooms.bind(store);
+    store.cleanupExpiredRooms = () => originalCleanup(Date.now() + 365 * 24 * 60 * 60 * 1000);
+    try {
+      store.startCleanup(10);
+      await new Promise((r) => setTimeout(r, 100));
+      expect(await store.get(expired.id)).toBeUndefined();
+    } finally {
+      store.stopCleanup();
+      store.cleanupExpiredRooms = originalCleanup;
+    }
+  });
+
+  test("stopCleanup is a no-op when cleanup was never started", () => {
+    expect(() => store.stopCleanup()).not.toThrow();
+  });
+});
+
 describe("concurrency", () => {
   test(
     "concurrent addParticipant calls racing right at the capacity boundary never lose a write and never exceed it",

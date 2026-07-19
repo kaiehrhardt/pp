@@ -145,7 +145,11 @@ jobs:
             --command -- \
             sh -c 'set -e
               curl -sf http://pp-ci/api/version
-              curl -sf http://pp-ci/api/ready
+              for i in $(seq 1 10); do
+                if curl -sf http://pp-ci/api/ready; then break; fi
+                if [ "$i" = 10 ]; then echo "api/ready never became healthy"; exit 1; fi
+                sleep 3
+              done
               room=$(curl -sf -X POST http://pp-ci/api/rooms)
               echo "$room"
               echo "$room" | grep -q roomId'
