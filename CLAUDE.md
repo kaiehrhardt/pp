@@ -37,6 +37,8 @@ A PR must contain exactly one commit. Don't rely on GitHub's squash-merge button
 
 Before finishing any change, check whether `README.md` still matches reality — new/changed features, scripts, prerequisites, or UI flows described in the "Try it locally" walkthrough. Update it in the same commit/PR if it's out of date; otherwise leave it alone.
 
+The "Architecture" section's Mermaid diagrams are a structural picture of the system (components, deployment topology, cross-pod sequence flows, data model), not implementation detail — if a change adds/removes a component, changes how state is persisted or relayed (e.g. touches ADR-0003's territory), or alters the Turso schema, update the relevant diagram(s) in the same commit/PR. Validate edits by actually rendering them (e.g. `bunx @mermaid-js/mermaid-cli`) rather than eyeballing the syntax — Mermaid's sequence-diagram parser chokes on HTML-entity-escaped angle brackets (`&lt;id&gt;`) even though flowcharts tolerate them, so use plain `<id>` if a diagram needs that.
+
 The screenshots under `docs/screenshots/` (`landing.jpg`, `room-voting.jpg`, `room-revealed.jpg`) are real app captures, not mockups — if a change alters what those screens visually show (layout, new UI elements, avatars, toolbar, etc.), regenerate them: run `bun run dev`, drive the app with Playwright against the local Chromium at `/opt/pw-browsers/chromium-*/chrome-linux/chrome` (`chromium-cli` if available), and overwrite the existing files in place (same filenames/crop) rather than adding new ones.
 
 ## Agent skills

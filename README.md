@@ -117,6 +117,169 @@ bunx tsc --noEmit # typecheck across the whole project
 
 `e2e/` drives the real app (server + bundled frontend) in a headless Chromium browser via [Playwright](https://playwright.dev), covering the core room flow (create → join → vote → reveal) end to end rather than unit-testing individual modules.
 
+## Architecture
+
+### Components
+
+A single `Bun.serve()` process (`src/backend/index.ts`) handles everything — HTTP routes, the WebSocket upgrade, and serving the bundled frontend. There's no separate API server, build step, or reverse proxy in front of the app logic itself.
+
+```mermaid
+flowchart LR
+    FE["React UI<br/>(src/frontend)"]
+
+    subgraph Pod["Bun.serve process"]
+        HTTP["HTTP routes<br/>/, /room/*, /api/*"]
+        WS["WS handler<br/>(ws/handler.ts)"]
+        Channel["roomChannel<br/>(ws/roomChannel.ts)"]
+        Store["RoomStore<br/>(domain/store.ts)"]
+        Domain["Pure domain logic<br/>(domain/room.ts, duel.ts, deck.ts)"]
+    end
+
+    Turso[("Turso / libSQL<br/>rooms, participants,<br/>chat_messages,<br/>round_evaluations")]
+    Redis[("Redis<br/>pub/sub: room:<id>:events")]
+
+    FE -- "fetch: create/check room" --> HTTP
+    FE -- "WebSocket: vote, chat,<br/>reactions, duel commands" --> WS
+    WS --> Store
+    WS --> Channel
+    Store --> Domain
+    Store <--> Turso
+    Channel <--> Redis
+    Channel -- "roomState / reaction /<br/>duel events" --> FE
+```
+
+`RoomStore` is the only thing that talks to Turso, and it's the sole owner of Room/Participant/Chat state — nothing else mutates it directly (see [ADR-0003](./docs/adr/0003-turso-and-redis-for-horizontal-scaling.md)). `roomChannel` is the only thing that talks to Redis, fanning a room's events out to every WebSocket connection for that room, on any pod.
+
+### Horizontal scaling
+
+Because Room state lives in Turso rather than in-process memory, any pod can serve any participant — a client's WebSocket connection doesn't need to land on "its" room's original pod. Cross-pod delivery (a vote cast against pod A reaching a participant connected to pod B) goes through one Redis pub/sub channel per room.
+
+```mermaid
+flowchart TB
+    ClientA["Browser A"]
+    ClientB["Browser B"]
+
+    Svc["Service / Ingress"]
+
+    subgraph Cluster["Kubernetes Deployment (replicaCount pods)"]
+        PodA["Pod A"]
+        PodB["Pod B"]
+    end
+
+    Turso[("Turso (libSQL)<br/>durable Room/Participant/Chat state")]
+    Redis[("Redis<br/>cross-pod pub/sub")]
+
+    ClientA --> Svc --> PodA
+    ClientB --> Svc --> PodB
+    PodA <--> Turso
+    PodB <--> Turso
+    PodA <--> Redis
+    PodB <--> Redis
+```
+
+A single-replica deployment needs neither Turso nor Redis reachable from more than one place, but the app still requires both at boot regardless of replica count — there's deliberately no in-memory fallback path (ADR-0003 superseded the single-instance design of [ADR-0001](./docs/adr/0001-in-memory-single-instance-state.md)).
+
+### Real-time state sync across pods
+
+A mutation (e.g. casting a vote) is written to Turso first, then published once to Redis; every pod subscribed to that room's channel — including the one that made the write — relays the resulting `roomState` to its own locally-connected sockets.
+
+```mermaid
+sequenceDiagram
+    participant A as Participant A
+    participant Pod1 as Pod 1
+    participant Turso
+    participant Redis
+    participant Pod2 as Pod 2
+    participant B as Participant B
+
+    A->>Pod1: WS "vote" {card}
+    Pod1->>Turso: UPDATE participants.vote
+    Turso-->>Pod1: updated Room
+    opt everyone has voted
+        Pod1->>Turso: reveal() + INSERT round_evaluations
+    end
+    Pod1->>Redis: PUBLISH room:<id>:events (roomSnapshot)
+    Redis-->>Pod1: relay (local subscriber too)
+    Redis-->>Pod2: relay
+    Pod1-->>A: roomState (WS)
+    Pod2-->>B: roomState (WS)
+```
+
+### Duels: the deliberate exception
+
+Everything above assumes durable, Turso-backed state — Duels are the one piece of Room state that stays purely ephemeral, living only in the memory of whichever pod first received the challenge (ADR-0003). Cross-pod moves/responses are relayed as one-off command messages over the same Redis channel, routed to whichever pod actually owns that Duel; every other subscriber just ignores them.
+
+```mermaid
+sequenceDiagram
+    participant A as Challenger
+    participant Pod1 as Pod 1 (owns the Duel)
+    participant Redis
+    participant Pod2 as Pod 2
+    participant B as Opponent
+
+    A->>Pod1: WS "duelChallenge"
+    Note over Pod1: Duel held in Pod 1's memory only<br/>(never written to Turso)
+    Pod1->>Redis: PUBLISH unicast "duelChallenge"
+    Redis-->>Pod2: relay
+    Pod2-->>B: duelChallenge (WS)
+
+    B->>Pod2: WS "duelRespond" {accept: true}
+    Pod2->>Redis: PUBLISH duelCommand envelope
+    Redis-->>Pod1: relay
+    Note over Pod2: Pod 2 also receives its own<br/>publish, but doesn't own this<br/>Duel, so it's a no-op there
+    Pod1->>Redis: PUBLISH unicast "duelStarted" (both sides)
+    Redis-->>Pod1: relay
+    Redis-->>Pod2: relay
+    Pod1-->>A: duelStarted (WS)
+    Pod2-->>B: duelStarted (WS)
+```
+
+Only a completed Duel's *outcome* is durable: the winner's Trophy (`participants.trophy_count`) and a room-wide tally of completed Duels (`rooms.duels_completed`, shown in the Session Evaluation widget) — never the moves, score-in-progress, or challenge itself.
+
+### Data model
+
+```mermaid
+erDiagram
+    ROOMS ||--o{ PARTICIPANTS : has
+    ROOMS ||--o{ CHAT_MESSAGES : has
+    ROOMS ||--o{ ROUND_EVALUATIONS : has
+
+    ROOMS {
+        text id PK
+        text host_id
+        text phase
+        int created_at
+        int empty_since
+        int reactions_thrown
+        int duels_completed
+    }
+    PARTICIPANTS {
+        text id PK
+        text room_id FK
+        text token
+        text name
+        int is_spectator
+        int trophy_count
+        int connected
+    }
+    CHAT_MESSAGES {
+        text id PK
+        text room_id FK
+        text participant_id
+        text text
+        int sent_at
+    }
+    ROUND_EVALUATIONS {
+        text id PK
+        text room_id FK
+        real average
+        text recommended_card
+        int revealed_at
+    }
+```
+
+Duels have no table here on purpose — see above. `reactions_thrown`/`duels_completed` are plain counters (bumped alongside the mutation that causes them), not event logs; nothing records *which* emoji was thrown or *who* played which Duel.
+
 ## Project structure
 
 ```
