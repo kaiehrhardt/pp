@@ -128,6 +128,21 @@ tests:
             name: TURSO_DATABASE_URL
             value: "http://RELEASE-NAME-pp-sqld:8080"
 
+  - it: scopes the selector and pod label to the app component, excluding bundled redis/sqld pods
+    set:
+      redis.enabled: true
+      sqld.enabled: true
+    asserts:
+      - equal:
+          path: spec.selector.matchLabels
+          value:
+            app.kubernetes.io/name: pp
+            app.kubernetes.io/instance: RELEASE-NAME
+            app.kubernetes.io/component: app
+      - equal:
+          path: spec.template.metadata.labels["app.kubernetes.io/component"]
+          value: app
+
   - it: lets extraEnv override the auto-wired REDIS_URL, since it's appended last
     set:
       redis.enabled: true

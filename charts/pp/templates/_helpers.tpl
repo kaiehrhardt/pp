@@ -49,6 +49,19 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Selector labels scoped to the app's own pods. The bundled redis/sqld pods (see
+redis-deployment.yaml, sqld-deployment.yaml) share the base selector labels above, and
+sqld's container port is even named "http" like the app's — so any Service/selector
+that uses the base labels alone would pick up sqld/redis pods as backends too. Every
+selector that must resolve to app pods only (the app's Service, Deployment, and
+PodDisruptionBudget) uses this instead.
+*/}}
+{{- define "pp.appSelectorLabels" -}}
+{{ include "pp.selectorLabels" . }}
+app.kubernetes.io/component: app
+{{- end }}
+
+{{/*
 Create the name of the service account to use.
 */}}
 {{- define "pp.serviceAccountName" -}}
