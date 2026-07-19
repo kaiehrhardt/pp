@@ -1,3 +1,10 @@
+## [2.1.1](https://github.com/kaiehrhardt/pp/compare/2.1.0...2.1.1) (2026-07-19)
+
+
+### Bug Fixes
+
+* build multi-arch (amd64+arm64) release images ([43df2a3](https://github.com/kaiehrhardt/pp/commit/43df2a3e51a86d9849f858d9d3b1952112242502))
+
 # [2.1.0](https://github.com/kaiehrhardt/pp/compare/2.0.2...2.1.0) (2026-07-19)
 
 
