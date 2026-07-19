@@ -1,3 +1,16 @@
+# [2.1.0](https://github.com/kaiehrhardt/pp/compare/2.0.2...2.1.0) (2026-07-19)
+
+
+### Bug Fixes
+
+* **room:** allow starting an RPS duel after the round is revealed ([209c2ee](https://github.com/kaiehrhardt/pp/commit/209c2ee362bf052f364e4b386952a2b278845cee))
+* **room:** slow down the thrown-emoji reaction animation ([d37635c](https://github.com/kaiehrhardt/pp/commit/d37635cd287826e588890fab4fe5a306606baa82))
+
+
+### Features
+
+* **room:** add reactions/duels/trophies to the Session Evaluation widget ([a7e6ed4](https://github.com/kaiehrhardt/pp/commit/a7e6ed413fbf8cbb4e5b661d5931f8ceffbee5eb))
+
 ## [2.0.2](https://github.com/kaiehrhardt/pp/compare/2.0.1...2.0.2) (2026-07-19)
 
 
