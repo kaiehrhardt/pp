@@ -116,7 +116,7 @@ export function useRoomSocket(roomId: string, join: JoinInfo | null) {
           setReactions((current) => [...current, { id, from: message.from, to: message.to, emoji: message.emoji }]);
           setTimeout(() => {
             setReactions((current) => current.filter((r) => r.id !== id));
-          }, 1500);
+          }, 2000);
         } else if (message.type === "kicked") {
           kickedRef.current = true;
           localStorage.removeItem(tokenKey(roomId));

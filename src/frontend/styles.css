@@ -724,7 +724,7 @@ button:disabled {
   top: var(--from-y);
   font-size: 1.85rem;
   pointer-events: none;
-  animation: throw 1.1s cubic-bezier(0.33, 0, 0.2, 1) forwards;
+  animation: throw 1.9s cubic-bezier(0.33, 0, 0.2, 1) forwards;
   z-index: 5;
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.35));
 }

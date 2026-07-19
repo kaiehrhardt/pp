@@ -57,7 +57,7 @@ A random color assigned to a participant at join for visual distinction, unrelat
 _Avoid_: Avatar color (renamed to avoid colliding with the new Avatar concept), Color alone (ambiguous with Card/Vote values)
 
 **Reaction**:
-An emoji thrown from one participant at another specific participant — always one-to-one, never room-wide and never at yourself (blocked client-side; the server only checks the target exists in the Room). Picked from the same curated emoji list as Avatar, but unrelated in purpose: a Reaction is a one-off thrown gesture, not a standing identity marker. Purely ephemeral — relayed live over the socket and animated flying between the two participants' seats for 1.5 seconds, then gone; never stored in Room state. Any participant can throw or be targeted, Spectators included, and a disconnected-but-not-yet-removed participant can still be targeted.
+An emoji thrown from one participant at another specific participant — always one-to-one, never room-wide and never at yourself (blocked client-side; the server only checks the target exists in the Room). Picked from the same curated emoji list as Avatar, but unrelated in purpose: a Reaction is a one-off thrown gesture, not a standing identity marker. Purely ephemeral — relayed live over the socket and animated flying between the two participants' seats for 2 seconds, then gone; never stored in Room state. Any participant can throw or be targeted, Spectators included, and a disconnected-but-not-yet-removed participant can still be targeted.
 _Avoid_: Emoji burst, Broadcast (a Reaction is always targeted at one participant, not sent to the room at large)
 
 **Kick**:
