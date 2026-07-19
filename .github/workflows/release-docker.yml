@@ -30,15 +30,28 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Determine image tags
+      - name: Determine image tags and OCI metadata
         id: image
         run: |
           image="ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')"
           version="$(jq -r .version package.json)"
+          repo_url="https://github.com/${{ github.repository }}"
           {
             echo "tags<<EOF"
             echo "$image:$version"
             echo "$image:latest"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "labels<<EOF"
+            echo "org.opencontainers.image.title=Planning Poker"
+            echo "org.opencontainers.image.description=Estimate work together via Planning Poker in real time."
+            echo "org.opencontainers.image.url=$repo_url"
+            echo "org.opencontainers.image.source=$repo_url"
+            echo "org.opencontainers.image.version=$version"
+            echo "org.opencontainers.image.revision=${{ github.sha }}"
+            echo "org.opencontainers.image.created=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "org.opencontainers.image.licenses=MIT"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
@@ -49,5 +62,7 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.image.outputs.tags }}
+          labels: ${{ steps.image.outputs.labels }}
+          annotations: ${{ steps.image.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
