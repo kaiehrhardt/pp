@@ -284,8 +284,13 @@ button:disabled {
 
 .table {
   position: relative;
+  --seat-count: 8;
   width: clamp(240px, 85vmin, 900px);
-  font-size: clamp(0.85rem, 2.1vmin, 1.5rem);
+  /* Seats sit on a fixed-radius ring (see seatRadius() in Room.tsx); past ~10
+     participants the ring's circumference per seat shrinks faster than the
+     radius can grow without pushing seats into the sticky header, so tiles are
+     scaled down here too once --seat-count passes that point. */
+  font-size: clamp(0.75rem, calc(2.1vmin - max(0, var(--seat-count) - 10) * 0.11vmin), 1.5rem);
   aspect-ratio: 1;
   flex-shrink: 0;
 }

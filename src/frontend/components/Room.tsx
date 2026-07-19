@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocale } from "../i18n/useLocale";
 import type { JoinInfo } from "../useRoomSocket";
@@ -15,9 +15,18 @@ import { SessionEvaluation } from "./SessionEvaluation";
 import type { SeatPosition } from "./ThrownEmoji";
 import { ThrownEmoji } from "./ThrownEmoji";
 
+// Past ~10 seats, a fixed 42% radius doesn't give tiles (which are taller than
+// wide) enough arc length to clear each other near the ring's sides — grows
+// gently with the room's MAX_PARTICIPANTS-15 ceiling in mind, capped short of
+// where the top seat would slide under the sticky header. Paired with the
+// --seat-count-driven tile shrink in styles.css.
+function seatRadius(total: number): number {
+  return Math.min(44, 38 + total * 0.4);
+}
+
 function seatPosition(index: number, total: number): SeatPosition {
   const angle = (2 * Math.PI * index) / total - Math.PI / 2;
-  const radius = 42;
+  const radius = seatRadius(total);
   return { x: 50 + radius * Math.cos(angle), y: 50 + radius * Math.sin(angle) };
 }
 
@@ -143,7 +152,7 @@ export function Room({ roomId }: RoomProps) {
         <Leaderboard participants={roomState.participants} />
         <SessionEvaluation stats={roomState.sessionEvaluation} />
 
-        <div className="table">
+        <div className="table" style={{ "--seat-count": roomState.participants.length } as CSSProperties}>
           <div className="table-surface">
             {revealed && roomState.evaluation && (
               <div className="evaluation">
