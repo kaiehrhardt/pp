@@ -26,10 +26,11 @@ tests:
           path: spec.ports[0].port
           value: 8080
 
-  - it: selects pods by the chart's selector labels
+  - it: selects only the app's own pods, not the bundled redis/sqld pods
     asserts:
       - equal:
           path: spec.selector
           value:
             app.kubernetes.io/name: pp
             app.kubernetes.io/instance: RELEASE-NAME
+            app.kubernetes.io/component: app
