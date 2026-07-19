@@ -32,8 +32,13 @@ A web app for teams to estimate work together via Planning Poker in real time â€
     <td><img src="docs/screenshots/room-revealed.jpg" alt="Room after reveal, showing the average and recommended card"></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/rps-duel.jpg" alt="Rock-Paper-Scissors duel between two participants"></td>
+    <td><img src="docs/screenshots/rps-duel.jpg" alt="Rock-Paper-Scissors duel between two participants, playable even after a reveal"></td>
     <td><img src="docs/screenshots/leaderboard.jpg" alt="Session trophy leaderboard, opened after a unanimous vote"></td>
+    <td><img src="docs/screenshots/session-evaluation.jpg" alt="Session Evaluation widget: rounds, reactions thrown, duels played, trophies won"></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/chat.jpg" alt="Room chat with a clickable link"></td>
+    <td><img src="docs/screenshots/room-full.jpg" alt="A room at its 15-participant capacity"></td>
   </tr>
 </table>
 
