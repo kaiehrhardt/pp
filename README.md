@@ -110,9 +110,12 @@ Once a release commit lands, `.github/workflows/release-docker.yml` builds the c
 ## Tests & typecheck
 
 ```bash
-bun test          # domain logic, persistence, and cross-pod Redis relay — needs a reachable Redis (see Prerequisites)
+bun test          # domain logic, persistence, cross-pod Redis relay, and the e2e suite below — needs a reachable Redis (see Prerequisites)
+bun test:e2e      # just the Playwright e2e suite (needs Chromium: `bunx playwright install chromium`, once)
 bunx tsc --noEmit # typecheck across the whole project
 ```
+
+`e2e/` drives the real app (server + bundled frontend) in a headless Chromium browser via [Playwright](https://playwright.dev), covering the core room flow (create → join → vote → reveal) end to end rather than unit-testing individual modules.
 
 ## Project structure
 
@@ -125,6 +128,7 @@ src/
     ├── redis/       # Bun.redis pub/sub wrapper (publisher + reconnect-safe subscriber)
     └── ws/          # WebSocket protocol & handler; roomChannel.ts relays state and
                       # duel commands across pods over Redis
+e2e/                 # Playwright end-to-end tests, driven through bun test
 ```
 
 ## License

@@ -18,7 +18,7 @@ Default to using Bun instead of Node.js.
 
 ## Testing
 
-Use `bun test`. Tests are colocated with the code they cover (`*.test.ts` next to the source, e.g. `src/backend/domain/room.test.ts`, `src/frontend/linkify.test.ts`). Typecheck the whole project with `bunx tsc --noEmit`.
+Use `bun test`. Unit/integration tests are colocated with the code they cover (`*.test.ts` next to the source, e.g. `src/backend/domain/room.test.ts`, `src/frontend/linkify.test.ts`). End-to-end tests live under `e2e/` (`*.e2e.test.ts`) since they exercise the whole app rather than one module — they drive the real server through Playwright's Chromium (needs `bunx playwright install chromium` once, plus a reachable Redis like the other integration tests). Typecheck the whole project with `bunx tsc --noEmit`.
 
 ## Commit messages
 

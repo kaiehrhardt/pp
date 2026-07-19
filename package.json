@@ -10,6 +10,7 @@
     "start": "bun src/backend/index.ts",
     "test": "bun test",
     "test:coverage": "bun test --coverage",
+    "test:e2e": "bun test e2e",
     "release": "semantic-release",
     "docker:build": "docker build -t planning-poker .",
     "docker:run": "docker run --rm -p 3000:3000 planning-poker",
@@ -27,6 +28,7 @@
     "@types/bun": "latest",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
+    "playwright": "^1.61.1",
     "semantic-release": "25.0.7",
     "semantic-release-helm3": "2.10.0"
   },
