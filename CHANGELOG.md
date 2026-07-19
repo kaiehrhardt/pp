@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/kaiehrhardt/pp/compare/2.0.0...2.0.1) (2026-07-19)
+
+
+### Bug Fixes
+
+* **chart:** scope the app Service selector to the app's own pods ([f022a0f](https://github.com/kaiehrhardt/pp/commit/f022a0f63b834156dc604b002fdbec26da5897c1))
+
 # [2.0.0](https://github.com/kaiehrhardt/pp/compare/1.8.1...2.0.0) (2026-07-19)
 
 
