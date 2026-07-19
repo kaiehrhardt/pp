@@ -88,6 +88,16 @@ describe("room capacity", () => {
         }
         await hostPage.locator(".evaluation").waitFor({ state: "visible" });
         await hostPage.screenshot({ path: join(SCREENSHOT_DIR, `room-${count}-participants.png`) });
+
+        // The table is sized off .table-area's own box (container query units,
+        // see styles.css), not the raw viewport, specifically so a full room
+        // never forces a page scroll — regardless of window size.
+        const { scrollHeight, clientHeight } = await hostPage.evaluate(() => ({
+          scrollHeight: document.documentElement.scrollHeight,
+          clientHeight: document.documentElement.clientHeight,
+        }));
+        expect(scrollHeight).toBeLessThanOrEqual(clientHeight);
+
         if (count < MAX_PARTICIPANTS) {
           await hostPage.getByRole("button", { name: "Neue Runde" }).click();
         }

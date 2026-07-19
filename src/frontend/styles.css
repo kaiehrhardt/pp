@@ -230,7 +230,14 @@ button:disabled {
 }
 
 .room {
-  min-height: 100vh;
+  /* Pinned to the viewport (not min-height) so .table-area's flex-computed
+     height is a real, bounded box that .table can size itself against via
+     container query units below — otherwise the table's own vmin-based size
+     could exceed the space actually left after the header/footer, forcing a
+     page scroll. dvh (dynamic viewport height) is the effective value in
+     browsers that support it; the vh line above it is the fallback. */
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -280,17 +287,35 @@ button:disabled {
   align-items: center;
   justify-content: center;
   padding: 1.5rem 0;
+  /* Establishes a query container sized by the flex layout above (i.e. by
+     whatever room the sticky header/footer actually leave), so .table's
+     cqmin-based sizing below tracks real available space instead of the raw
+     viewport — and stays live as the window is resized, no JS needed. */
+  container-type: size;
 }
 
 .table {
   position: relative;
   --seat-count: 8;
-  width: clamp(240px, 85vmin, 900px);
-  /* Seats sit on a fixed-radius ring (see seatRadius() in Room.tsx); past ~10
-     participants the ring's circumference per seat shrinks faster than the
-     radius can grow without pushing seats into the sticky header, so tiles are
-     scaled down here too once --seat-count passes that point. */
-  font-size: clamp(0.75rem, calc(2.1vmin - max(0, var(--seat-count) - 10) * 0.11vmin), 1.5rem);
+  /* cqmin (not vmin): sized against .table-area's own box — the space actually
+     left after the header/footer — so it fills whatever the browser window
+     gives it without ever forcing a page scroll. */
+  --table-size: clamp(200px, 85cqmin, 900px);
+  width: var(--table-size);
+  /* Derived from --table-size (not an independent cqmin clamp) so tiles keep
+     shrinking in lockstep with the table itself all the way down; a font-size
+     computed straight from cqmin would hit its own legibility floor well
+     before the table hit *its* floor, leaving oversized tiles on a ring that
+     had already shrunk out from under them. Seats sit on a fixed-radius ring
+     (see seatRadius() in Room.tsx); past ~10 participants the ring's
+     circumference per seat shrinks faster than the radius can grow without
+     pushing seats into the sticky header, so tiles are scaled down further
+     here once --seat-count passes that point. */
+  font-size: clamp(
+    0.6rem,
+    calc(var(--table-size) * (0.0247 - max(0, var(--seat-count) - 10) * 0.0013)),
+    1.5rem
+  );
   aspect-ratio: 1;
   flex-shrink: 0;
 }
