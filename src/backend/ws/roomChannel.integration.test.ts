@@ -146,4 +146,28 @@ describe("cross-pod relay over Redis", () => {
     aliceConn.ws.close();
     bobConn.ws.close();
   });
+
+  test("a duel can be challenged and accepted after the round has already been revealed", async () => {
+    const room = await podA.store.create();
+    const alice = await podA.store.addParticipant(room.id, "Alice", false, "🙂");
+    const bob = await podA.store.addParticipant(room.id, "Bob", false, "🙂");
+    if (alice === "full" || alice === "not_found" || bob === "full" || bob === "not_found") throw new Error("unexpected");
+
+    const aliceConn = await connect(podA.server, room.id, alice.participant.id);
+    const bobConn = await connect(podB.server, room.id, bob.participant.id);
+
+    aliceConn.ws.send(JSON.stringify({ type: "vote", card: 5 }));
+    bobConn.ws.send(JSON.stringify({ type: "vote", card: 5 }));
+    await waitFor(() => bobConn.messages.some((m: any) => m.type === "roomState" && m.room.phase === "revealed"));
+
+    aliceConn.ws.send(JSON.stringify({ type: "duelChallenge", opponentId: bob.participant.id }));
+    await waitFor(() => bobConn.messages.some((m: any) => m.type === "duelChallenge"));
+    const duelId = (bobConn.messages.find((m: any) => m.type === "duelChallenge") as any).duelId;
+
+    bobConn.ws.send(JSON.stringify({ type: "duelRespond", duelId, accept: true }));
+    await waitFor(() => aliceConn.messages.some((m: any) => m.type === "duelStarted"));
+
+    aliceConn.ws.close();
+    bobConn.ws.close();
+  });
 });

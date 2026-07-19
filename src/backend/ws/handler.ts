@@ -97,7 +97,6 @@ export function createWebSocketHandlers(store: RoomStore, roomChannel: RoomChann
           return;
         }
         case "duelChallenge": {
-          if (room.phase !== "voting") return;
           const opponent = room.participants.get(message.opponentId);
           if (!opponent || opponent.id === participant.id || !opponent.connected) return;
           const duel = roomChannel.createOwnedDuel(room, participant.id, opponent.id);

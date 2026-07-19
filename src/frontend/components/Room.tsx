@@ -187,7 +187,7 @@ export function Room({ roomId }: RoomProps) {
                   revealed={revealed}
                   canKick={isHost && participant.id !== participantId}
                   isGuessWinner={roomState.guessWinnerIds.includes(participant.id)}
-                  canChallenge={participant.id !== participantId && participant.connected && roomState.phase === "voting"}
+                  canChallenge={participant.id !== participantId && participant.connected}
                   flipDelay={index * 70}
                   onReact={(emoji) => react(participant.id, emoji)}
                   onKick={() => kick(participant.id)}
