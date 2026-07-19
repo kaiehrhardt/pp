@@ -1,3 +1,27 @@
+# [2.0.0](https://github.com/kaiehrhardt/pp/compare/1.8.1...2.0.0) (2026-07-19)
+
+
+* feat!: back room state with Turso and cross-pod Redis pub/sub for horizontal scaling ([9771693](https://github.com/kaiehrhardt/pp/commit/9771693e5183a0fc108646b44033beb9b0c03cfc)), closes [#26](https://github.com/kaiehrhardt/pp/issues/26)
+
+
+### Features
+
+* add session evaluation widget, fix reaction picker stacking ([e0cca72](https://github.com/kaiehrhardt/pp/commit/e0cca72b33048829faf97cc0f3b46850b2fa3206))
+
+
+### BREAKING CHANGES
+
+* the app now requires a reachable Redis (REDIS_URL) to boot at
+all, in every environment including local dev and tests — there is no in-memory
+fallback. TURSO_DATABASE_URL defaults to a local file (file:./dev.db) so Turso
+itself has no hard external dependency, but Redis does. Existing Helm deployments
+must set redis.enabled/sqld.enabled or supply external TURSO_DATABASE_URL/
+TURSO_AUTH_TOKEN/REDIS_URL via extraEnv before upgrading, or the app will
+crash-loop on boot.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01BBPvypL1TAJcsNWMM4VRwR
+
 ## [1.8.1](https://github.com/kaiehrhardt/pp/compare/1.8.0...1.8.1) (2026-07-17)
 
 

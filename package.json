@@ -3,7 +3,7 @@
   "module": "src/backend/index.ts",
   "type": "module",
   "private": true,
-  "version": "1.8.1",
+  "version": "2.0.0",
   "license": "MIT",
   "scripts": {
     "dev": "bun --hot src/backend/index.ts",

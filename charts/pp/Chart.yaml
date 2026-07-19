@@ -4,8 +4,8 @@ description: Planning Poker - a web app for teams to estimate work together in r
 type: application
 # Kept in sync with package.json's version by the semantic-release-helm3 plugin
 # (see .releaserc.cjs) on every release commit — don't bump these by hand.
-version: 1.8.1
-appVersion: "1.8.1"
+version: 2.0.0
+appVersion: "2.0.0"
 home: https://github.com/kaiehrhardt/pp
 sources:
   - https://github.com/kaiehrhardt/pp
