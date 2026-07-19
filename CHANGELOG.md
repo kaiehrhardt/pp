@@ -1,3 +1,11 @@
+## [2.0.2](https://github.com/kaiehrhardt/pp/compare/2.0.1...2.0.2) (2026-07-19)
+
+
+### Bug Fixes
+
+* **room:** keep seat ring from overlapping tiles at high participant counts ([3cffd7c](https://github.com/kaiehrhardt/pp/commit/3cffd7c494a2706006d025d0565a21435d9c0d82))
+* **room:** size the table off available space, not the raw viewport ([3d02808](https://github.com/kaiehrhardt/pp/commit/3d02808fd7fd3252619b552331bd53ba6b30b692))
+
 ## [2.0.1](https://github.com/kaiehrhardt/pp/compare/2.0.0...2.0.1) (2026-07-19)
 
 
