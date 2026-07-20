@@ -19,7 +19,7 @@ tests:
           value: Recreate
       - matchRegex:
           path: spec.template.spec.containers[0].image
-          pattern: ^ghcr\.io/tursodatabase/libsql-server:latest(@sha256:[0-9a-f]{64})?$
+          pattern: ^ghcr\.io/tursodatabase/libsql-server:[^@\s]+(@sha256:[0-9a-f]{64})?$
       - equal:
           path: spec.template.spec.containers[0].ports[0].containerPort
           value: 8080
