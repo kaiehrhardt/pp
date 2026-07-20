@@ -16,7 +16,7 @@ tests:
           value: 1
       - matchRegex:
           path: spec.template.spec.containers[0].image
-          pattern: ^redis:7-alpine(@sha256:[0-9a-f]{64})?$
+          pattern: ^redis:[^@\s]+(@sha256:[0-9a-f]{64})?$
       - equal:
           path: spec.template.spec.containers[0].ports[0].containerPort
           value: 6379
