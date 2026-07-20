@@ -1,3 +1,10 @@
+## [2.1.3](https://github.com/kaiehrhardt/pp/compare/2.1.2...2.1.3) (2026-07-20)
+
+
+### Bug Fixes
+
+* make helm chart image assertions tolerant of version bumps ([828c200](https://github.com/kaiehrhardt/pp/commit/828c200f4e90300af59f09961f629e570bfa3c24)), closes [#34](https://github.com/kaiehrhardt/pp/issues/34) [#28](https://github.com/kaiehrhardt/pp/issues/28)
+
 ## [2.1.2](https://github.com/kaiehrhardt/pp/compare/2.1.1...2.1.2) (2026-07-20)
 
 
