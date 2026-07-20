@@ -1,3 +1,10 @@
+## [2.1.2](https://github.com/kaiehrhardt/pp/compare/2.1.1...2.1.2) (2026-07-20)
+
+
+### Bug Fixes
+
+* unblock renovate CI on TS7 typecheck and pinned image digests ([0474c17](https://github.com/kaiehrhardt/pp/commit/0474c171c082fe2be22cbc608f19d6978c88a48d))
+
 ## [2.1.1](https://github.com/kaiehrhardt/pp/compare/2.1.0...2.1.1) (2026-07-19)
 
 
