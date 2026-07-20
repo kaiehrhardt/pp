@@ -37,13 +37,13 @@ services:
     # (confirmed by inspecting it) and no documented HTTP health endpoint, so `app`'s
     # `depends_on` only waits for the container to start, not for a deep health check —
     # `app`'s `restart: unless-stopped` covers a slow sqld boot by just retrying.
-    image: ghcr.io/tursodatabase/libsql-server:latest
+    image: ghcr.io/tursodatabase/libsql-server:latest@sha256:07d5da358f37f7f327cc33c1cb5278e7892e04225f011a65a76049372a308982
     volumes:
       - sqld-data:/var/lib/sqld
     restart: unless-stopped
 
   redis:
-    image: redis:7-alpine
+    image: redis:7-alpine@sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
