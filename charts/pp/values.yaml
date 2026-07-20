@@ -131,7 +131,7 @@ redis:
   enabled: false
   image:
     repository: redis
-    tag: 7-alpine
+    tag: 7-alpine@sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99
   resources:
     limits:
       cpu: 200m
@@ -151,7 +151,7 @@ sqld:
   enabled: false
   image:
     repository: ghcr.io/tursodatabase/libsql-server
-    tag: latest
+    tag: latest@sha256:07d5da358f37f7f327cc33c1cb5278e7892e04225f011a65a76049372a308982
   resources:
     limits:
       cpu: 500m
