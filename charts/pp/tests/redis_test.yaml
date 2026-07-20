@@ -14,9 +14,9 @@ tests:
       - equal:
           path: spec.replicas
           value: 1
-      - equal:
+      - matchRegex:
           path: spec.template.spec.containers[0].image
-          value: redis:7-alpine
+          pattern: ^redis:7-alpine(@sha256:[0-9a-f]{64})?$
       - equal:
           path: spec.template.spec.containers[0].ports[0].containerPort
           value: 6379
