@@ -3,6 +3,7 @@ import { isValidCard } from "../domain/deck";
 import * as domain from "../domain/room";
 import type { RoomStore } from "../domain/store";
 import type { Room } from "../domain/types";
+import { logger } from "../logger";
 import type { ClientMessage } from "./protocol";
 import type { RoomChannel, SocketData } from "./roomChannel";
 
@@ -26,6 +27,7 @@ export function createWebSocketHandlers(store: RoomStore, roomChannel: RoomChann
       const participant = room?.participants.get(ws.data.participantId);
       if (!room || !participant) return;
 
+      logger.debug("ws connected", { roomId: room.id, participantId: participant.id });
       roomChannel.sendLocal(room.id, participant.id, {
         type: "joined",
         roomId: room.id,
@@ -47,8 +49,11 @@ export function createWebSocketHandlers(store: RoomStore, roomChannel: RoomChann
       try {
         message = JSON.parse(String(raw));
       } catch {
+        logger.debug("ignored malformed ws message", { roomId: room.id, participantId: participant.id });
         return;
       }
+
+      logger.debug("ws message received", { roomId: room.id, participantId: participant.id, type: message.type });
 
       switch (message.type) {
         case "vote": {
@@ -83,6 +88,7 @@ export function createWebSocketHandlers(store: RoomStore, roomChannel: RoomChann
           if (message.participantId === participant.id) return;
           if (!room.participants.has(message.participantId)) return;
 
+          logger.info("participant kicked", { roomId: room.id, actorId: participant.id, targetId: message.participantId });
           await roomChannel.sendToParticipant(room.id, message.participantId, { type: "kicked" });
           await roomChannel.cancelDuelsForParticipant(room.id, message.participantId);
           const updated = await store.removeParticipant(room.id, message.participantId);
@@ -155,6 +161,7 @@ export function createWebSocketHandlers(store: RoomStore, roomChannel: RoomChann
       roomChannel.unregisterSocket(ws);
       const room = await store.get(ws.data.roomId);
       if (!room) return;
+      logger.debug("ws disconnected", { roomId: room.id, participantId: ws.data.participantId });
       await roomChannel.cancelDuelsForParticipant(room.id, ws.data.participantId);
       const updated = await store.disconnectParticipant(room.id, ws.data.participantId);
       if (updated) await roomChannel.publishRoomState(updated);

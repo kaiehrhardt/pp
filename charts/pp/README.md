@@ -58,6 +58,7 @@ See [values.yaml](values.yaml) for the full list. Notable ones:
 | `ingress.enabled` | `false` | Set `true` and fill in `ingress.hosts` to expose the app |
 | `resources` | 100m/128Mi requests, 500m/256Mi limits | Pod resource sizing |
 | `replicaCount` / `autoscaling` | `2` / enabled, 2-3 replicas | Requires Turso + Redis, see caveat above |
+| `logLevel` | `""` (app defaults to `info`) | Set `debug`/`warn`/`error` to override backend log verbosity |
 | `extraEnv` | `[]` | Set `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `REDIS_URL` here for an external Turso/Redis |
 | `redis.enabled` / `sqld.enabled` | `false` / `false` | Bundle a minimal in-cluster Redis / Turso (sqld) instead |
 
