@@ -19,6 +19,7 @@ export type DuelCommand =
 interface SerializedRoom {
   id: string;
   hostId: string | null;
+  pendingHostId: string | null;
   phase: RoomPhase;
   participants: Participant[];
   createdAt: number;
@@ -39,6 +40,7 @@ function serializeRoom(room: Room): SerializedRoom {
   return {
     id: room.id,
     hostId: room.hostId,
+    pendingHostId: room.pendingHostId,
     phase: room.phase,
     participants: [...room.participants.values()],
     createdAt: room.createdAt,
@@ -53,6 +55,7 @@ function deserializeRoom(s: SerializedRoom): Room {
   return {
     id: s.id,
     hostId: s.hostId,
+    pendingHostId: s.pendingHostId,
     phase: s.phase,
     participants: new Map(s.participants.map((p) => [p.id, p])),
     chatMessages: [],
@@ -90,6 +93,7 @@ export function createRoomChannel(store: RoomStore) {
     return {
       id: roomId,
       hostId: null,
+      pendingHostId: null,
       phase: "voting",
       participants: new Map(),
       chatMessages: [],

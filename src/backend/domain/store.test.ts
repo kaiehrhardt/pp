@@ -148,6 +148,35 @@ describe("Tier 2 host reassignment and cleanup", () => {
     expect(final!.hostId).toBe(b.participant.id);
   });
 
+  test("reconnecting the former host restores host status if the fallback host hasn't acted", async () => {
+    const room = await store.create();
+    const a = await store.addParticipant(room.id, "Ada", false, "🙂");
+    const b = await store.addParticipant(room.id, "Bea", false, "🙂");
+    if (a === "full" || a === "not_found" || b === "full" || b === "not_found") throw new Error("unexpected");
+    await store.disconnectParticipant(room.id, a.participant.id);
+
+    await store.reconnectParticipant(room.id, a.participant.id);
+
+    const final = await store.get(room.id);
+    expect(final!.hostId).toBe(a.participant.id);
+    expect(final!.pendingHostId).toBeNull();
+  });
+
+  test("starting a new round forfeits the disconnected former host's automatic return", async () => {
+    const room = await store.create();
+    const a = await store.addParticipant(room.id, "Ada", false, "🙂");
+    const b = await store.addParticipant(room.id, "Bea", false, "🙂");
+    if (a === "full" || a === "not_found" || b === "full" || b === "not_found") throw new Error("unexpected");
+    await store.disconnectParticipant(room.id, a.participant.id);
+
+    await store.startNewRound(room.id);
+    await store.reconnectParticipant(room.id, a.participant.id);
+
+    const final = await store.get(room.id);
+    expect(final!.hostId).toBe(b.participant.id);
+    expect(final!.pendingHostId).toBeNull();
+  });
+
   test("removeParticipant (kick) deletes the row entirely", async () => {
     const room = await store.create();
     const a = await store.addParticipant(room.id, "Ada", false, "🙂");

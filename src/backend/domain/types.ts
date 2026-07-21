@@ -42,6 +42,10 @@ export interface Duel {
 export interface Room {
   id: string;
   hostId: string | null;
+  // The participant who was host when their connection dropped, entitled to get the
+  // role back on reconnect — as long as no one else has used host powers meanwhile
+  // (see startNewRound/removeParticipant, which forfeit it on behalf of the acting host).
+  pendingHostId: string | null;
   phase: RoomPhase;
   participants: Map<string, Participant>;
   chatMessages: ChatMessage[];

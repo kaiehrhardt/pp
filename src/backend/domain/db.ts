@@ -40,4 +40,5 @@ export async function migrate(db: Client): Promise<void> {
   await db.executeMultiple(schema);
   await ensureColumn(db, "rooms", "reactions_thrown", "INTEGER NOT NULL DEFAULT 0");
   await ensureColumn(db, "rooms", "duels_completed", "INTEGER NOT NULL DEFAULT 0");
+  await ensureColumn(db, "rooms", "pending_host_id", "TEXT");
 }
