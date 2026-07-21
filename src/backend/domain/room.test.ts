@@ -141,6 +141,61 @@ describe("host succession", () => {
 
     expect(room.emptySince).toBeNull();
   });
+
+  test("reconnecting restores host status if no one has acted as host meanwhile", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+    addParticipant(room, "Bob", false);
+    disconnectParticipant(room, alice.id);
+
+    reconnectParticipant(room, alice);
+
+    expect(room.hostId).toBe(alice.id);
+    expect(room.pendingHostId).toBeNull();
+  });
+
+  test("a later fallback host disconnecting too doesn't bump the original's claim to return", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+    const bob = addParticipant(room, "Bob", false);
+    addParticipant(room, "Carol", false);
+    disconnectParticipant(room, alice.id);
+    expect(room.hostId).toBe(bob.id);
+
+    disconnectParticipant(room, bob.id);
+    reconnectParticipant(room, alice);
+
+    expect(room.hostId).toBe(alice.id);
+  });
+
+  test("starting a new round forfeits a disconnected former host's automatic return", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+    const bob = addParticipant(room, "Bob", false);
+    disconnectParticipant(room, alice.id);
+    expect(room.hostId).toBe(bob.id);
+
+    startNewRound(room);
+    reconnectParticipant(room, alice);
+
+    expect(room.hostId).toBe(bob.id);
+    expect(room.pendingHostId).toBeNull();
+  });
+
+  test("kicking a participant forfeits a disconnected former host's automatic return", () => {
+    const room = createRoom();
+    const alice = addParticipant(room, "Alice", false);
+    const bob = addParticipant(room, "Bob", false);
+    const carol = addParticipant(room, "Carol", false);
+    disconnectParticipant(room, alice.id);
+    expect(room.hostId).toBe(bob.id);
+
+    removeParticipant(room, carol.id);
+    reconnectParticipant(room, alice);
+
+    expect(room.hostId).toBe(bob.id);
+    expect(room.pendingHostId).toBeNull();
+  });
 });
 
 describe("auto-reveal", () => {

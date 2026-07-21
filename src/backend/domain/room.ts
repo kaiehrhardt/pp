@@ -37,6 +37,7 @@ export function createRoom(): Room {
   return {
     id: nanoid(ROOM_ID_LENGTH),
     hostId: null,
+    pendingHostId: null,
     phase: "voting",
     participants: new Map(),
     chatMessages: [],
@@ -79,6 +80,10 @@ export function findParticipantByToken(room: Room, token: string): Participant |
 export function reconnectParticipant(room: Room, participant: Participant): void {
   participant.connected = true;
   room.emptySince = null;
+  if (room.pendingHostId === participant.id) {
+    room.hostId = participant.id;
+    room.pendingHostId = null;
+  }
 }
 
 // Map preserves insertion (= join) order, so the first connected entry is
@@ -97,6 +102,9 @@ export function disconnectParticipant(room: Room, participantId: string): void {
   participant.connected = false;
 
   if (room.hostId === participantId) {
+    // Only remember the first one to fall back — a later fallback host disconnecting
+    // too shouldn't bump the original's claim to get the role back.
+    if (room.pendingHostId === null) room.pendingHostId = participantId;
     room.hostId = pickNextHost(room);
   }
 
@@ -106,6 +114,10 @@ export function disconnectParticipant(room: Room, participantId: string): void {
 
 export function removeParticipant(room: Room, participantId: string): void {
   room.participants.delete(participantId);
+  // Only reachable via a host-gated kick — the acting host using their power forfeits
+  // a disconnected former host's automatic reinstatement (also covers that former host
+  // being the one kicked, who now has nothing to return to).
+  room.pendingHostId = null;
 
   const anyoneConnected = [...room.participants.values()].some((p) => p.connected);
   if (!anyoneConnected) room.emptySince = Date.now();
@@ -157,6 +169,9 @@ export function reveal(room: Room): void {
 
 export function startNewRound(room: Room): void {
   room.phase = "voting";
+  // Only reachable via a host-gated action — the acting host using their power forfeits
+  // a disconnected former host's automatic reinstatement.
+  room.pendingHostId = null;
   for (const participant of room.participants.values()) {
     participant.vote = null;
     participant.guess = null;

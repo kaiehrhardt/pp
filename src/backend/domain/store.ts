@@ -8,6 +8,7 @@ import {
   disconnectParticipant as disconnectParticipantPure,
   GRACE_PERIOD_MS,
   isRoomFull,
+  reconnectParticipant as reconnectParticipantPure,
   removeParticipant as removeParticipantPure,
   reveal as revealPure,
 } from "./room";
@@ -23,6 +24,7 @@ const MAX_ATTEMPTS = 4;
 interface RoomRow {
   id: string;
   host_id: string | null;
+  pending_host_id: string | null;
   phase: string;
   created_at: number;
   empty_since: number | null;
@@ -65,7 +67,17 @@ function parseCard(value: string | null): Card | null {
 // a `chatMessages` array or `duels` map to exist, never to hold real data — neither
 // field is backed by Turso (chat has its own table; Duels stay ephemeral, see ADR-0003).
 function emptyRoomShell(id: string): Room {
-  return { id, hostId: null, phase: "voting", participants: new Map(), chatMessages: [], duels: new Map(), createdAt: 0, emptySince: null };
+  return {
+    id,
+    hostId: null,
+    pendingHostId: null,
+    phase: "voting",
+    participants: new Map(),
+    chatMessages: [],
+    duels: new Map(),
+    createdAt: 0,
+    emptySince: null,
+  };
 }
 
 class BusinessRuleViolation extends Error {}
@@ -88,7 +100,7 @@ async function hydrateRoom(
   roomId: string,
 ): Promise<{ room: Room; joinedAtById: Map<string, number> } | undefined> {
   const roomResult = await executor.execute({
-    sql: "SELECT id, host_id, phase, created_at, empty_since FROM rooms WHERE id = ?",
+    sql: "SELECT id, host_id, pending_host_id, phase, created_at, empty_since FROM rooms WHERE id = ?",
     args: [roomId],
   });
   const roomRow = roomResult.rows[0] as unknown as RoomRow | undefined;
@@ -120,6 +132,7 @@ async function hydrateRoom(
   const room: Room = {
     id: roomRow.id,
     hostId: roomRow.host_id,
+    pendingHostId: roomRow.pending_host_id,
     phase: roomRow.phase as RoomPhase,
     participants,
     chatMessages: [],
@@ -131,7 +144,7 @@ async function hydrateRoom(
 }
 
 function snapshotRoomFields(room: Room): string {
-  return JSON.stringify([room.hostId, room.phase, room.emptySince]);
+  return JSON.stringify([room.hostId, room.pendingHostId, room.phase, room.emptySince]);
 }
 
 function snapshotParticipant(p: Participant): string {
@@ -156,9 +169,9 @@ async function persistRoom(
 ): Promise<void> {
   if (snapshotRoomFields(room) !== before.room) {
     await tx.execute({
-      sql: `INSERT INTO rooms (id, host_id, phase, created_at, empty_since, version) VALUES (?, ?, ?, ?, ?, 0)
-            ON CONFLICT(id) DO UPDATE SET host_id = excluded.host_id, phase = excluded.phase, empty_since = excluded.empty_since, version = rooms.version + 1`,
-      args: [room.id, room.hostId, room.phase, room.createdAt, room.emptySince],
+      sql: `INSERT INTO rooms (id, host_id, pending_host_id, phase, created_at, empty_since, version) VALUES (?, ?, ?, ?, ?, ?, 0)
+            ON CONFLICT(id) DO UPDATE SET host_id = excluded.host_id, pending_host_id = excluded.pending_host_id, phase = excluded.phase, empty_since = excluded.empty_since, version = rooms.version + 1`,
+      args: [room.id, room.hostId, room.pendingHostId, room.phase, room.createdAt, room.emptySince],
     });
   }
 
@@ -325,24 +338,14 @@ export class RoomStore {
     });
   }
 
-  async reconnectParticipant(roomId: string, participantId: string): Promise<Room | undefined> {
-    await this.db.batch(
-      [
-        { sql: "UPDATE participants SET connected = 1, version = version + 1 WHERE id = ? AND room_id = ?", args: [participantId, roomId] },
-        { sql: "UPDATE rooms SET empty_since = NULL, version = version + 1 WHERE id = ?", args: [roomId] },
-      ],
-      "write",
-    );
-    return this.get(roomId);
-  }
-
   // Genuinely unconditional (no read-then-decide), so this is Tier 1 too despite touching
-  // every participant row at once.
+  // every participant row at once. Unconditionally nulling pending_host_id is safe too —
+  // the acting host starting a round always forfeits a disconnected former host's claim.
   async startNewRound(roomId: string): Promise<Room | undefined> {
     await this.db.batch(
       [
         { sql: "UPDATE participants SET vote = NULL, guess = NULL, version = version + 1 WHERE room_id = ?", args: [roomId] },
-        { sql: "UPDATE rooms SET phase = 'voting', version = version + 1 WHERE id = ?", args: [roomId] },
+        { sql: "UPDATE rooms SET phase = 'voting', pending_host_id = NULL, version = version + 1 WHERE id = ?", args: [roomId] },
       ],
       "write",
     );
@@ -374,6 +377,17 @@ export class RoomStore {
   async disconnectParticipant(roomId: string, participantId: string): Promise<Room | undefined> {
     const outcome = await withRoom(this.db, roomId, (room) => {
       disconnectParticipantPure(room, participantId);
+    });
+    return outcome?.room;
+  }
+
+  // Read-then-decide (not Tier 1) because restoring host status depends on the room's
+  // current pendingHostId — see reconnectParticipantPure.
+  async reconnectParticipant(roomId: string, participantId: string): Promise<Room | undefined> {
+    const outcome = await withRoom(this.db, roomId, (room) => {
+      const participant = room.participants.get(participantId);
+      if (!participant) return;
+      reconnectParticipantPure(room, participant);
     });
     return outcome?.room;
   }

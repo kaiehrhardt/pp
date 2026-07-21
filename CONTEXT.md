@@ -9,7 +9,7 @@ A session a user opens, which others join via a link. Groups all participants an
 _Avoid_: Table (a purely visual metaphor in the UI, not a domain object in its own right), Session
 
 **Host**:
-The participant in control of the round flow (e.g. starting a new round). Originally the room's creator; if their connection drops, control automatically passes to the longest-connected remaining participant (spectators included).
+The participant in control of the round flow (e.g. starting a new round). Originally the room's creator; if their connection drops, control automatically passes to the longest-connected remaining participant (spectators included). Reconnecting gets it back automatically — unless the stand-in host has meanwhile actually exercised it (started a new round, kicked someone), which forfeits the original's claim for good.
 
 **Reveal**:
 The automatic uncovering of all chosen cards once every participant has voted. Not a manually triggered step.

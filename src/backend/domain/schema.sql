@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS rooms (
   id                TEXT PRIMARY KEY,
   host_id           TEXT,
+  pending_host_id   TEXT,
   phase             TEXT NOT NULL DEFAULT 'voting' CHECK (phase IN ('voting', 'revealed')),
   created_at        INTEGER NOT NULL,
   empty_since       INTEGER,

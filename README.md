@@ -16,7 +16,7 @@ A web app for teams to estimate work together via Planning Poker in real time �
 - Open a room, share the link, join in seconds — no accounts, no setup
 - Fibonacci deck (1–55, plus ☕ and ?), with automatic reveal once everyone's voted
 - Average + closest-card recommendation shown after every reveal
-- Pick an emoji avatar when joining; spectator mode, host controls (new round, kick), automatic host handover if the host disconnects
+- Pick an emoji avatar when joining; spectator mode, host controls (new round, kick), automatic host handover if the host disconnects (given back on reconnect, unless the stand-in host has already acted)
 - Throw an emoji at another participant, animated flying from you to them
 - Mini-games while you wait: guess the round's average, challenge someone to a Rock-Paper-Scissors duel, confetti on a unanimous vote — with a session trophy leaderboard
 - Built-in room chat with clickable links and an emoji picker
@@ -252,6 +252,7 @@ erDiagram
     ROOMS {
         text id PK
         text host_id
+        text pending_host_id
         text phase
         int created_at
         int empty_since
