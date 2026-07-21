@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/kaiehrhardt/pp/compare/2.1.5...2.2.0) (2026-07-21)
+
+
+### Features
+
+* **backend:** add structured logging ([9b022ba](https://github.com/kaiehrhardt/pp/commit/9b022baee1218b3619cfb8eb0d21d764cc65bbb1))
+
 ## [2.1.5](https://github.com/kaiehrhardt/pp/compare/2.1.4...2.1.5) (2026-07-21)
 
 
