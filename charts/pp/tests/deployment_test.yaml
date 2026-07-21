@@ -101,6 +101,23 @@ tests:
             name: FOO
             value: bar
 
+  - it: omits LOG_LEVEL by default
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: LOG_LEVEL
+
+  - it: sets LOG_LEVEL when logLevel is given
+    set:
+      logLevel: debug
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: LOG_LEVEL
+            value: debug
+
   - it: omits REDIS_URL/TURSO_DATABASE_URL by default (neither bundled service enabled)
     asserts:
       - notContains:

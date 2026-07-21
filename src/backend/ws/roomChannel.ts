@@ -3,6 +3,7 @@ import * as duelDomain from "../domain/duel";
 import { computeEvaluation } from "../domain/room";
 import type { RoomStore } from "../domain/store";
 import type { Duel, Participant, Room, RoomPhase, RpsMove } from "../domain/types";
+import { logger } from "../logger";
 import { getSubscriber, publisher } from "../redis/pubsub";
 import { toRoomStateDTO, type ServerMessage } from "./protocol";
 
@@ -198,6 +199,7 @@ export function createRoomChannel(store: RoomStore) {
           const matchWinnerId = duelDomain.matchWinnerId(duel);
           duelDomain.removeDuel(roomShapeForDuels(roomId), duel.id);
           if (matchWinnerId) {
+            logger.info("duel completed", { roomId, duelId: duel.id, winnerId: matchWinnerId });
             await store.incrementDuelsCompleted(roomId);
             const updated = await store.awardTrophy(roomId, matchWinnerId);
             if (updated) await publishRoomState(updated);
@@ -218,7 +220,8 @@ export function createRoomChannel(store: RoomStore) {
     let envelope: RoomEnvelope;
     try {
       envelope = JSON.parse(raw);
-    } catch {
+    } catch (err) {
+      logger.error("failed to parse room envelope", { roomId, err });
       return;
     }
 
@@ -250,6 +253,7 @@ export function createRoomChannel(store: RoomStore) {
   }
 
   async function onSubscriberReconnect(): Promise<void> {
+    logger.warn("redis subscriber reconnected; reconciling rooms", { roomCount: subscribedRooms.size });
     const client = await getSubscriber(onSubscriberReconnect);
     for (const roomId of subscribedRooms) {
       await client.subscribe(channelFor(roomId), (message) => void handleEnvelope(roomId, message));

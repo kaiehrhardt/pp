@@ -1,5 +1,6 @@
 import { LibsqlError, type Client, type Transaction } from "@libsql/client";
 import { nanoid } from "nanoid";
+import { logger } from "../logger";
 import {
   addChatMessage as addChatMessagePure,
   addParticipant as addParticipantPure,
@@ -473,15 +474,17 @@ export class RoomStore {
 
   async cleanupExpiredRooms(now: number = Date.now()): Promise<void> {
     const cutoff = now - GRACE_PERIOD_MS;
-    await this.db.batch(
+    const results = await this.db.batch(
       ["PRAGMA foreign_keys = ON", { sql: "DELETE FROM rooms WHERE empty_since IS NOT NULL AND empty_since <= ?", args: [cutoff] }],
       "write",
     );
+    const deleted = results[1]?.rowsAffected ?? 0;
+    if (deleted > 0) logger.info("expired rooms cleaned up", { count: deleted });
   }
 
   startCleanup(intervalMs = 60_000): void {
     const run = () => {
-      this.cleanupExpiredRooms().catch((err) => console.error("room cleanup sweep failed", err));
+      this.cleanupExpiredRooms().catch((err) => logger.error("room cleanup sweep failed", { err }));
     };
     // Jittered start so many pods sharing one Turso database don't all sweep in lockstep.
     setTimeout(() => {

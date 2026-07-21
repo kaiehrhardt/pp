@@ -99,6 +99,13 @@ autoscaling:
   maxReplicas: 3
   targetCPUUtilizationPercentage: 80
 
+# -- Backend log verbosity: "debug", "info", "warn", or "error". Empty leaves it unset,
+# which falls back to the app's own default — "info", since NODE_ENV is hardcoded to
+# production below. Set to "debug" to temporarily get connection/message-level detail
+# while chasing an issue; see the root README's "Try it locally" section for the log
+# format (JSON lines in production, one object per line, for log aggregators).
+logLevel: ""
+
 # -- Extra environment variables for the container. Requires TURSO_DATABASE_URL,
 # TURSO_AUTH_TOKEN, and REDIS_URL for a multi-replica deployment (see the replicaCount
 # note above) — supply them via an out-of-band-managed Secret (sealed-secrets,

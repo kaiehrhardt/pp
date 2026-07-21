@@ -57,6 +57,8 @@ bun run dev
 
 The server starts with hot reload on [http://localhost:3000](http://localhost:3000). Room state is stored in `./dev.db` (a local libSQL file, gitignored) and cross-connection events flow through your local Redis.
 
+The backend logs to stdout/stderr — readable `[LEVEL] msg {meta}` lines outside production, structured JSON lines (one object per line, for log aggregators) when `NODE_ENV=production`. Verbosity defaults to `debug` outside production and `info` in production; override with `LOG_LEVEL=debug|info|warn|error`.
+
 To try the full flow (create a room, join, estimate, throw smileys) you need at least two browser windows/tabs, since each tab simulates its own participant:
 
 1. Open `http://localhost:3000` in the first tab and click **"Neuen Room erstellen"** ("Create new room").
