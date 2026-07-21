@@ -1,3 +1,10 @@
+## [2.1.5](https://github.com/kaiehrhardt/pp/compare/2.1.4...2.1.5) (2026-07-21)
+
+
+### Bug Fixes
+
+* **room:** restore host status on reconnect after a disconnect ([0c9363c](https://github.com/kaiehrhardt/pp/commit/0c9363c6af342f2ee1d126692c01e69962c8fcd4))
+
 ## [2.1.4](https://github.com/kaiehrhardt/pp/compare/2.1.3...2.1.4) (2026-07-20)
 
 
