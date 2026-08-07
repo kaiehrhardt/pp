@@ -52,7 +52,11 @@ beforeAll(async () => {
 
 afterAll(async () => {
   server?.kill();
-  await Promise.all([browser?.close(), server?.exited]);
+  // Graceful browser/server teardown can occasionally outlast a generous budget under
+  // CI resource contention. Race it against a timeout instead of awaiting it strictly —
+  // the CI runner tears down the whole container right after anyway, so a Chromium
+  // process that's slow to exit shouldn't fail the suite.
+  await Promise.race([Promise.all([browser?.close(), server?.exited]), Bun.sleep(15_000)]);
   rmSync(dbDir, { recursive: true, force: true });
 }, 20_000);
 
