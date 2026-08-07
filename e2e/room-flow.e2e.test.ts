@@ -51,11 +51,10 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await browser?.close();
   server?.kill();
-  await server?.exited;
+  await Promise.all([browser?.close(), server?.exited]);
   rmSync(dbDir, { recursive: true, force: true });
-});
+}, 20_000);
 
 describe("room flow", () => {
   test("create a room, join, vote, and see the round revealed", async () => {

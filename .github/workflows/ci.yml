@@ -34,16 +34,13 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Install Playwright Chromium
-        run: bunx playwright install --with-deps chromium
-
       - name: Type check
         run: bunx tsc --noEmit
 
       - name: Test
         env:
           REDIS_URL: redis://localhost:6379
-        run: bun test --coverage
+        run: bun run test:coverage
 
       - name: Upload coverage report
         if: always()
@@ -53,8 +50,40 @@ jobs:
           path: coverage/lcov.info
           retention-days: 14
 
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:8-alpine@sha256:9d317178eceac8454a2284a9e6df2466b93c745529947f0cd42a0fa9609d7005
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: bunx playwright install --with-deps chromium
+
+      - name: Test
+        env:
+          REDIS_URL: redis://localhost:6379
+        run: bun run test:e2e
+
   build:
-    needs: test
+    needs: [test, e2e]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

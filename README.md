@@ -98,7 +98,7 @@ docker run --rm -p 3000:3000 \
 
 Unless `TURSO_DATABASE_URL` is set, it falls back to an in-container local file (`file:./dev.db`) that's lost when the container is removed — fine for a quick check, not for anything you want to keep. For anything beyond a one-off, use [Docker Compose](#docker-compose) above instead, which wires all of this up for you. The port can be changed via the `PORT` environment variable (`-e PORT=8080 -p 8080:8080`).
 
-A GitHub Actions workflow (`.github/workflows/ci.yml`) runs on feature branches and pull requests (not on `main`): it first runs the typecheck and test suite, then — only if that passes — builds the image and pushes it to GitHub Container Registry, tagged `pr-<number>` for a pull request or `<commit-sha>` for a plain branch push. No extra secrets needed — it authenticates with the workflow's built-in `GITHUB_TOKEN`. The resulting package is private by default; change its visibility under the repo's "Packages" tab if you want it public.
+A GitHub Actions workflow (`.github/workflows/ci.yml`) runs on feature branches and pull requests (not on `main`): it first runs the typecheck + unit test suite and the Playwright e2e suite as separate parallel jobs, then — only if both pass — builds the image and pushes it to GitHub Container Registry, tagged `pr-<number>` for a pull request or `<commit-sha>` for a plain branch push. No extra secrets needed — it authenticates with the workflow's built-in `GITHUB_TOKEN`. The resulting package is private by default; change its visibility under the repo's "Packages" tab if you want it public.
 
 ### Kubernetes (Helm)
 
@@ -117,8 +117,8 @@ Once a release commit lands, `.github/workflows/release-docker.yml` builds the c
 ## Tests & typecheck
 
 ```bash
-bun test          # domain logic, persistence, cross-pod Redis relay, and the e2e suite below — needs a reachable Redis (see Prerequisites)
-bun test:e2e      # just the Playwright e2e suite (needs Chromium: `bunx playwright install chromium`, once)
+bun test          # domain logic, persistence, and cross-pod Redis relay — needs a reachable Redis (see Prerequisites)
+bun test:e2e      # the Playwright e2e suite, run separately in CI (needs Chromium: `bunx playwright install chromium`, once)
 bunx tsc --noEmit # typecheck across the whole project
 ```
 

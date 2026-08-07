@@ -8,9 +8,9 @@
   "scripts": {
     "dev": "bun --hot src/backend/index.ts",
     "start": "bun src/backend/index.ts",
-    "test": "bun test",
-    "test:coverage": "bun test --coverage",
-    "test:e2e": "bun test e2e",
+    "test": "bun test src",
+    "test:coverage": "bun test --coverage src",
+    "test:e2e": "bun --config=bunfig.e2e.toml test e2e",
     "release": "semantic-release",
     "docker:build": "docker build -t planning-poker .",
     "docker:run": "docker run --rm -p 3000:3000 planning-poker",
