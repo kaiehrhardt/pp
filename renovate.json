@@ -15,6 +15,15 @@
       "automerge": true
     },
     {
+      "description": "Automerge major updates too for runtime deps (package.json \"dependencies\"): they're covered by the >=95% unit/e2e coverage gate, unlike dev tooling, Docker base images, Helm charts, or GitHub Actions, where a green CI run doesn't actually exercise the new version's behavior. Left ungrouped (one PR per package) so a bad major is easy to bisect.",
+      "matchManagers": ["npm"],
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["major"],
+      "schedule": ["before 3am"],
+      "minimumReleaseAge": "7 days",
+      "automerge": true
+    },
+    {
       "description": "Don't manage the chart's own image: tag defaults to \"\" and resolves via appVersion, so pinning it to a digest here breaks that default",
       "matchPackageNames": ["ghcr.io/kaiehrhardt/pp"],
       "enabled": false
