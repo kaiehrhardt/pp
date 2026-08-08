@@ -1,3 +1,5 @@
+## [3.0.0](https://github.com/kaiehrhardt/pp/compare/2.2.1...3.0.0) (2026-08-08)
+
 ## [2.2.1](https://github.com/kaiehrhardt/pp/compare/2.2.0...2.2.1) (2026-08-08)
 
 
