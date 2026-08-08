@@ -52,16 +52,6 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
-    services:
-      redis:
-        image: redis:8-alpine@sha256:9d317178eceac8454a2284a9e6df2466b93c745529947f0cd42a0fa9609d7005
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 5s
-          --health-timeout 3s
-          --health-retries 5
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -78,8 +68,6 @@ jobs:
         run: bunx playwright install --with-deps chromium
 
       - name: Test
-        env:
-          REDIS_URL: redis://localhost:6379
         run: bun run test:e2e
 
   build:

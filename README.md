@@ -118,11 +118,11 @@ Once a release commit lands, `.github/workflows/release-docker.yml` builds the c
 
 ```bash
 bun test          # domain logic, persistence, and cross-pod Redis relay — needs a reachable Redis (see Prerequisites)
-bun test:e2e      # the Playwright e2e suite, run separately in CI (needs Chromium: `bunx playwright install chromium`, once)
+bun test:e2e      # the Playwright e2e suite (needs Chromium: `bunx playwright install chromium`, once)
 bunx tsc --noEmit # typecheck across the whole project
 ```
 
-`e2e/` drives the real app (server + bundled frontend) in a headless Chromium browser via [Playwright](https://playwright.dev), covering the core room flow (create → join → vote → reveal) end to end rather than unit-testing individual modules.
+`e2e/` drives the real app (server + bundled frontend) in a headless Chromium browser via [Playwright](https://playwright.dev), covering the core room flow (create → join → vote → reveal) end to end rather than unit-testing individual modules. `bun test:e2e`'s script brings up the suite's one dependency — Redis — via `docker compose -f docker-compose.e2e.yml`, runs the tests, and tears it back down again afterwards; the same script runs in CI (`.github/workflows/ci.yml`'s `e2e` job just calls `bun run test:e2e`, no separate service container needed).
 
 ## Architecture
 
