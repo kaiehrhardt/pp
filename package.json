@@ -19,6 +19,8 @@
     "compose:prod": "docker compose -f docker-compose.prod.yml up"
   },
   "devDependencies": {
+    "@commitlint/cli": "21.2.1",
+    "@commitlint/config-conventional": "21.2.0",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/commit-analyzer": "13.0.1",
     "@semantic-release/git": "10.0.1",
@@ -28,6 +30,7 @@
     "@types/bun": "latest",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.4",
+    "conventional-changelog-conventionalcommits": "10.2.1",
     "playwright": "1.62.1",
     "semantic-release": "25.0.8",
     "semantic-release-helm3": "2.10.0"
