@@ -8,8 +8,8 @@ import { MAX_PARTICIPANTS } from "../src/backend/domain/room";
 // Boots the real app the same way room-flow.e2e.test.ts does, but fills a single
 // room to its MAX_PARTICIPANTS cap to visually verify the round-table layout
 // (seat-position ring, name truncation, vote-badge flip) doesn't break once full,
-// and that a 16th join is correctly rejected as roomFull. Needs a reachable
-// REDIS_URL and a Playwright Chromium build, same as room-flow.e2e.test.ts.
+// and that a 16th join is correctly rejected as roomFull. Needs a reachable Redis
+// and a Playwright Chromium build, same as room-flow.e2e.test.ts.
 
 const PORT = 4320;
 const BASE_URL = `http://localhost:${PORT}`;

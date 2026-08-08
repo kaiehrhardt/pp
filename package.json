@@ -10,7 +10,7 @@
     "start": "bun src/backend/index.ts",
     "test": "bun test src",
     "test:coverage": "bun test --coverage src",
-    "test:e2e": "bun --config=bunfig.e2e.toml test e2e",
+    "test:e2e": "docker compose -f docker-compose.e2e.yml up -d --wait && bun --config=bunfig.e2e.toml test e2e; ec=$?; docker compose -f docker-compose.e2e.yml down; exit $ec",
     "release": "semantic-release",
     "docker:build": "docker build -t planning-poker .",
     "docker:run": "docker run --rm -p 3000:3000 planning-poker",

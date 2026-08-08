@@ -1,0 +1,28 @@
+# Redis-only stack for the Playwright e2e suite (e2e/*.e2e.test.ts). The suite boots
+# the app itself as a bun subprocess (see e2e/room-flow.e2e.test.ts) and points
+# TURSO_DATABASE_URL at a per-run temp file, so the only external dependency it needs
+# is a reachable Redis on localhost:6379 (Bun's redis client's default when REDIS_URL
+# isn't set) — this file exists so that dependency comes from `docker compose` instead
+# of an ad hoc `docker run`, for both local runs and CI (.github/workflows/ci.yml).
+#
+# Usage:
+#   bun run test:e2e                                          # does all of this for you
+#   docker compose -f docker-compose.e2e.yml up -d --wait      # start manually
+#   docker compose -f docker-compose.e2e.yml down              # stop manually
+#
+# Named explicitly so this project (and its `redis` service) stays isolated from the
+# docker-compose.yml/.prod.yml stacks, which use the same default project name
+# (the repo directory) and also define a `redis` service — without this, running both
+# at once would have Compose treat them as the same service.
+name: pp-e2e
+
+services:
+  redis:
+    image: redis:8-alpine@sha256:9d317178eceac8454a2284a9e6df2466b93c745529947f0cd42a0fa9609d7005
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5

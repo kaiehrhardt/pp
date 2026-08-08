@@ -6,10 +6,9 @@ import { chromium, type Browser } from "playwright";
 
 // Boots the real app (src/backend/index.ts) as a subprocess, the same way `bun run
 // start` does, so this exercises the actual HTTP/WebSocket server and bundled
-// frontend rather than a test double. Like roomChannel.integration.test.ts, this
-// needs a reachable REDIS_URL (CI provides one as a service container; locally:
-// `docker run -p 6379:6379 redis:7-alpine`) and a Playwright Chromium build
-// (`bunx playwright install chromium`, once).
+// frontend rather than a test double. Needs a reachable Redis on localhost:6379 —
+// `bun run test:e2e` provides one via docker-compose.e2e.yml, both locally and in CI
+// — and a Playwright Chromium build (`bunx playwright install chromium`, once).
 
 const PORT = 4319;
 const BASE_URL = `http://localhost:${PORT}`;
