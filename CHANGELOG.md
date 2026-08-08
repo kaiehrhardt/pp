@@ -1,3 +1,10 @@
+## [2.2.1](https://github.com/kaiehrhardt/pp/compare/2.2.0...2.2.1) (2026-08-08)
+
+
+### Bug Fixes
+
+* **deps:** update all dependencies ([#40](https://github.com/kaiehrhardt/pp/issues/40)) ([92cf8c0](https://github.com/kaiehrhardt/pp/commit/92cf8c029303b45faf7b7d145f1715e0302b7e66))
+
 # [2.2.0](https://github.com/kaiehrhardt/pp/compare/2.1.5...2.2.0) (2026-07-21)
 
 
