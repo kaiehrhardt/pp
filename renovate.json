@@ -3,6 +3,11 @@
   "extends": ["config:best-practices"],
   "separateMultipleMajor": false,
   "rangeStrategy": "pin",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true,
+    "schedule": ["before 3am on monday"]
+  },
   "packageRules": [
     {
       "description": "Group all dependencies together",
