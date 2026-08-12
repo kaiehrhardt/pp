@@ -158,7 +158,7 @@ sqld:
   enabled: false
   image:
     repository: ghcr.io/tursodatabase/libsql-server
-    tag: latest@sha256:07d5da358f37f7f327cc33c1cb5278e7892e04225f011a65a76049372a308982
+    tag: latest@sha256:bc100873a74865392a49191b4733025fe8222a409799efa424dc196feaf05035
   resources:
     limits:
       cpu: 500m
