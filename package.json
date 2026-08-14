@@ -32,7 +32,7 @@
     "@types/react-dom": "19.2.4",
     "conventional-changelog-conventionalcommits": "10.2.1",
     "playwright": "1.62.1",
-    "semantic-release": "25.0.8",
+    "semantic-release": "25.0.9",
     "semantic-release-helm3": "2.10.0"
   },
   "peerDependencies": {
