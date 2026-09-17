@@ -26,12 +26,12 @@ Use [Conventional Commits](https://www.conventionalcommits.org/) — `semantic-r
 
 - `fix: ...` → patch release
 - `feat: ...` → minor release
-- A `BREAKING CHANGE:` footer (or `!` after the type, e.g. `feat!:`) → major release
+- A `BREAKING CHANGE:` footer → major release
 - Other types (`chore:`, `docs:`, `refactor:`, `test:`, `ci:`, …) don't trigger a release
 
 This only fires on pushes to `main` (see `.github/workflows/release.yml`); commits on feature branches just need to follow the format so the eventual merge/release picks them up correctly.
 
-A PR must contain exactly one commit. Don't rely on GitHub's squash-merge button — instead rebase/squash the feature branch itself down to a single commit (`git rebase -i`) before merging, so the branch already has one commit when the PR is opened/updated. The PR title must match that commit's message and follow Conventional Commits (e.g. `fix: ...`, `feat: ...`, `feat!: ...`), since that's what `semantic-release` sees on `main`.
+A PR must contain exactly one commit. Don't rely on GitHub's squash-merge button — instead rebase/squash the feature branch itself down to a single commit (`git rebase -i`) before merging, so the branch already has one commit when the PR is opened/updated. The PR title must match that commit's message and follow Conventional Commits (e.g. `fix: ...`, `feat: ...`), since that's what `semantic-release` sees on `main`.
 
 ## README maintenance
 
