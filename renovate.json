@@ -21,6 +21,12 @@
       "automerge": true
     },
     {
+      "description": "conventional-changelog-conventionalcommits is only exercised by the Release workflow on push to main (semantic-release's generateNotes step), which PR CI never runs, so a bump that's incompatible with the conventional-changelog-writer@8 pinned by @semantic-release/commit-analyzer and @semantic-release/release-notes-generator (as 10.4.0 was) reaches main before anything catches it. Keep it out of the auto-merged group and require manual review/verification.",
+      "matchPackageNames": ["conventional-changelog-conventionalcommits"],
+      "groupName": "conventional-changelog-conventionalcommits",
+      "automerge": false
+    },
+    {
       "description": "Automerge major updates too for runtime deps (package.json \"dependencies\"): they're covered by the >=95% unit/e2e coverage gate, unlike dev tooling, Docker base images, Helm charts, or GitHub Actions, where a green CI run doesn't actually exercise the new version's behavior. Left ungrouped (one PR per package) so a bad major is easy to bisect.",
       "matchManagers": ["npm"],
       "matchDepTypes": ["dependencies"],
