@@ -1,3 +1,10 @@
+## [3.0.4](https://github.com/kaiehrhardt/pp/compare/3.0.3...3.0.4) (2026-09-17)
+
+
+### Bug Fixes
+
+* **release:** stop using the conventionalcommits preset ([2eadafc](https://github.com/kaiehrhardt/pp/commit/2eadafc8f3e5c011d576d54ff7dfaec5f20da5f9))
+
 ## [3.0.3](https://github.com/kaiehrhardt/pp/compare/3.0.2...3.0.3) (2026-09-17)
 
 ## [3.0.2](https://github.com/kaiehrhardt/pp/compare/3.0.1...3.0.2) (2026-09-17)
