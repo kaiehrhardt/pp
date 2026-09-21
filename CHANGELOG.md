@@ -1,3 +1,10 @@
+## [3.0.5](https://github.com/kaiehrhardt/pp/compare/3.0.4...3.0.5) (2026-09-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency react-i18next to v17.0.14 ([#57](https://github.com/kaiehrhardt/pp/issues/57)) ([5817b3a](https://github.com/kaiehrhardt/pp/commit/5817b3a1331c5259ea4735443ec8e8e4d67dfabc))
+
 ## [3.0.4](https://github.com/kaiehrhardt/pp/compare/3.0.3...3.0.4) (2026-09-17)
 
 
