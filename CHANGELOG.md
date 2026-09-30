@@ -1,3 +1,10 @@
+## [3.0.6](https://github.com/kaiehrhardt/pp/compare/3.0.5...3.0.6) (2026-09-30)
+
+
+### Bug Fixes
+
+* **deps:** update all dependencies ([#62](https://github.com/kaiehrhardt/pp/issues/62)) ([b73f0e8](https://github.com/kaiehrhardt/pp/commit/b73f0e86fc8f0c22778dc1685fe5a35a2aec83f3))
+
 ## [3.0.5](https://github.com/kaiehrhardt/pp/compare/3.0.4...3.0.5) (2026-09-21)
 
 
