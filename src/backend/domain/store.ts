@@ -176,8 +176,20 @@ async function persistRoom(
     });
   }
 
+  // joined_at must be strictly increasing per room so hydrate ordering
+  // (ORDER BY joined_at ASC, id ASC) reflects actual join order. Date.now() is
+  // millisecond-resolution and can collide for rapid joins; the nanoid `id`
+  // tiebreak would then reorder participants arbitrarily.
+  let monotonicJoinedAt = Array.from(joinedAtById.values()).reduce((m, v) => Math.max(m, v), 0);
   for (const p of room.participants.values()) {
     if (before.participants.get(p.id) === snapshotParticipant(p)) continue;
+    let joinedAt = joinedAtById.get(p.id);
+    if (joinedAt === undefined) {
+      // New participant: assign a joined_at strictly greater than anything
+      // already in the room, so join order survives a hydrate.
+      monotonicJoinedAt = Math.max(Date.now(), monotonicJoinedAt + 1);
+      joinedAt = monotonicJoinedAt;
+    }
     await tx.execute({
       sql: `INSERT INTO participants (id, room_id, token, name, color, is_spectator, vote, guess, connected, trophy_count, avatar, joined_at, version)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
@@ -197,7 +209,7 @@ async function persistRoom(
         p.connected ? 1 : 0,
         p.trophyCount,
         p.avatar,
-        joinedAtById.get(p.id) ?? Date.now(),
+        joinedAt,
       ],
     });
   }
