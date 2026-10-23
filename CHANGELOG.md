@@ -1,3 +1,10 @@
+## [3.0.7](https://github.com/kaiehrhardt/pp/compare/3.0.6...3.0.7) (2026-10-23)
+
+
+### Bug Fixes
+
+* **store:** preserve join order across hydrate ([55ce145](https://github.com/kaiehrhardt/pp/commit/55ce14533c67e6df93868d5b7d38a7ce7a354414))
+
 ## [3.0.6](https://github.com/kaiehrhardt/pp/compare/3.0.5...3.0.6) (2026-09-30)
 
 
