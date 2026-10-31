@@ -19,8 +19,8 @@
     "compose:prod": "docker compose -f docker-compose.prod.yml up"
   },
   "devDependencies": {
-    "@commitlint/cli": "21.2.3",
-    "@commitlint/config-conventional": "21.2.3",
+    "@commitlint/cli": "21.2.4",
+    "@commitlint/config-conventional": "21.2.4",
     "@semantic-release/changelog": "7.0.0",
     "@semantic-release/commit-analyzer": "13.0.1",
     "@semantic-release/git": "11.0.1",
@@ -30,7 +30,7 @@
     "@types/bun": "latest",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "playwright": "1.63.0",
+    "playwright": "1.64.1",
     "semantic-release": "25.0.9",
     "semantic-release-helm3": "2.10.0"
   },
@@ -39,10 +39,10 @@
   },
   "dependencies": {
     "@libsql/client": "0.18.0",
-    "i18next": "26.4.2",
-    "nanoid": "6.0.1",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
-    "react-i18next": "17.0.15"
+    "i18next": "26.5.10",
+    "nanoid": "6.0.2",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-i18next": "17.1.7"
   }
 }
