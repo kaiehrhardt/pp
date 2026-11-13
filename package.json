@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@libsql/client": "0.18.0",
-    "i18next": "26.4.2",
+    "i18next": "27.1.1",
     "nanoid": "6.0.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
