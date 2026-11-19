@@ -31,7 +31,7 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "playwright": "1.63.0",
-    "semantic-release": "25.0.9",
+    "semantic-release": "26.0.1",
     "semantic-release-helm3": "2.10.0"
   },
   "peerDependencies": {
